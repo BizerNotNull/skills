@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Marlowe Records — 1970s record shop storefront (Retro style preview)</title>
+<style>
+  :root{
+    --paper:#F7EBD3;
+    --paper-deep:#EFDFC0;
+    --ink:#3B2A1E;
+    --ink-muted:#6B5340;
+    --ochre:#D9971F;
+    --rust:#B4461F;
+    --rust-deep:#9E3B18;
+    --avocado:#55622C;
+    --cream-muted:#E4D3B4;
+    --display:"Rockwell","Bookman Old Style",Georgia,"Times New Roman",serif;
+    --body:"Bookman Old Style",Georgia,"Palatino Linotype","Times New Roman",serif;
+    --mono:"Courier New","Lucida Console",monospace;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font:400 17px/1.6 var(--body);
+  }
+  h1,h2,h3{
+    font-family:var(--display);
+    font-weight:700;
+    line-height:.98;
+    letter-spacing:-.01em;
+    margin:0;
+    overflow-wrap:anywhere;
+  }
+  h1{font-size:clamp(34px,7vw,56px);}
+  h2{font-size:clamp(26px,4.6vw,40px);}
+  h3{font-size:21px;line-height:1.1;}
+  h1,h2{text-shadow:2px 2px 0 var(--ochre),4px 4px 0 var(--rust);}
+  p{margin:0 0 12px;}
+  p:last-child{margin-bottom:0;}
+  a{color:var(--ink);}
+  :focus-visible{outline:3px solid var(--ink);outline-offset:3px;border-radius:2px;}
+
+  .skip{
+    position:absolute;top:-72px;left:16px;z-index:9;
+    background:var(--paper);color:var(--ink);border:3px solid var(--ink);
+    padding:10px 16px;font-family:var(--mono);font-size:13px;text-decoration:none;
+  }
+  .skip:focus{top:12px;}
+
+  .wrap{width:100%;max-width:1120px;margin:0 auto;padding:0 clamp(16px,4vw,32px);}
+
+  .stripe-band{
+    height:14px;
+    border-top:3px solid var(--ink);
+    border-bottom:3px solid var(--ink);
+    background:repeating-linear-gradient(90deg,
+      var(--ochre) 0,var(--ochre) 14px,
+      var(--rust) 14px,var(--rust) 28px,
+      var(--paper-deep) 28px,var(--paper-deep) 42px,
+      var(--avocado) 42px,var(--avocado) 56px);
+  }
+
+  /* ---------- storefront header ---------- */
+  .shopfront{padding:32px 0 40px;}
+  .shopfront__top{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;justify-content:space-between;}
+  .kicker{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-muted);margin:0 0 8px;
+  }
+  .tagline{max-width:68ch;font-size:17px;margin:16px 0 0;}
+  .link-allstyles{
+    display:inline-flex;align-items:center;gap:8px;flex:none;
+    font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+    text-decoration:none;background:var(--paper-deep);border:3px solid var(--ink);
+    border-radius:999px;padding:9px 16px;box-shadow:4px 4px 0 var(--ink);
+    transition:background-color 120ms ease-out,transform 160ms cubic-bezier(.2,.8,.3,1),box-shadow 160ms cubic-bezier(.2,.8,.3,1);
+  }
+  .link-allstyles::before{content:"";width:12px;height:12px;flex:none;border-radius:50%;background:var(--rust);border:2px solid var(--ink);}
+  .link-allstyles:hover{background:var(--ochre);transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink);}
+
+  .hours{
+    display:flex;flex-wrap:wrap;gap:12px 28px;
+    margin:24px 0 0;padding:12px 0;
+    border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);
+  }
+  .hours > div{display:flex;gap:10px;align-items:baseline;}
+  .hours dt{font-family:var(--mono);font-size:13px;letter-spacing:.04em;}
+  .hours dd{margin:0;font-size:15px;color:var(--ink-muted);}
+
+  /* ---------- bands ---------- */
+  .band{padding:48px 0;border-top:3px solid var(--ink);}
+  .band--ochre{background:var(--ochre);}
+  .band--ochre h1,.band--ochre h2{text-shadow:2px 2px 0 var(--rust),4px 4px 0 var(--paper);}
+  .band--deep{background:var(--paper-deep);}
+
+  .tag{
+    display:inline-block;
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    border-left:6px solid var(--rust);padding-left:10px;margin:0 0 14px;
+  }
+  .lede{max-width:68ch;font-size:17px;margin-top:4px;}
+
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;margin:0;
+    font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    padding:4px 12px;border:2px solid var(--ink);border-radius:999px;
+    background:var(--paper-deep);color:var(--ink);
+  }
+  .pill--avocado{background:var(--avocado);color:var(--paper);}
+  .pill--rust{background:var(--rust);color:var(--paper);}
+  .card__tags{display:flex;flex-wrap:wrap;gap:8px;}
+
+  .price-pill{
+    display:inline-flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0;
+    background:var(--rust);color:var(--paper);border:3px solid var(--ink);border-radius:999px;
+    padding:8px 18px;font-family:var(--mono);font-weight:700;font-size:18px;
+    box-shadow:4px 4px 0 var(--ink);
+  }
+  .price-pill small{font-family:var(--body);font-size:13px;font-weight:400;}
+
+  /* ---------- feature ---------- */
+  .split{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px;align-items:center;margin-top:24px;}
+  .disc{display:block;width:100%;max-width:300px;height:auto;margin:0 auto;}
+  .feature__title{font-size:28px;line-height:1.05;margin:0 0 4px;}
+  .feature__by{font-size:15px;color:var(--ink-muted);margin:0 0 16px;}
+  .meta{list-style:none;margin:0 0 20px;padding:0;display:grid;gap:8px;}
+  .meta li{display:flex;gap:10px;font-size:15px;padding-bottom:8px;border-bottom:1px dashed rgba(59,42,30,.35);}
+  .meta b{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;min-width:78px;}
+  .meta li > span{min-width:0;overflow-wrap:anywhere;}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    font:700 14px/1.1 var(--body);letter-spacing:.1em;text-transform:uppercase;
+    padding:14px 22px;border:3px solid var(--ink);border-radius:999px;
+    background:var(--paper);color:var(--ink);box-shadow:5px 5px 0 var(--ink);cursor:pointer;
+    transition:background-color 120ms ease-out,color 120ms ease-out,
+      transform 160ms cubic-bezier(.2,.8,.3,1),box-shadow 160ms cubic-bezier(.2,.8,.3,1);
+  }
+  .btn--primary{background:var(--rust);color:var(--paper);}
+  .btn--primary:hover{background:var(--rust-deep);transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink);}
+  .btn--ghost{background:transparent;}
+  .btn--ghost:hover{background:var(--ochre);transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink);}
+  .btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink);}
+  .btn[aria-pressed="true"]{background:var(--avocado);color:var(--paper);}
+  .btn:disabled{opacity:.45;box-shadow:none;cursor:not-allowed;background:var(--paper-deep);color:var(--ink);transform:none;}
+  .btn--sm{padding:10px 14px;font-size:12px;box-shadow:3px 3px 0 var(--ink);}
+
+  /* ---------- demo panel ---------- */
+  .pick{
+    display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:24px;align-items:center;
+    background:var(--paper);border:3px solid var(--ink);border-radius:2px;
+    padding:24px;box-shadow:8px 8px 0 var(--rust);
+  }
+  .pick__disc{
+    width:96px;height:96px;flex:none;border-radius:50%;border:3px solid var(--ink);
+    background:radial-gradient(circle at 50% 50%,
+      var(--paper) 0,var(--paper) 8%,
+      var(--rust) 8%,var(--rust) 26%,
+      var(--ink) 26%,var(--ink) 33%,
+      var(--ochre) 33%,var(--ochre) 37%,
+      var(--ink) 37%,var(--ink) 48%,
+      var(--ochre) 48%,var(--ochre) 52%,
+      var(--ink) 52%,var(--ink) 100%);
+  }
+  .pick__label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin:0 0 6px;}
+  .pick__title{font-family:var(--display);font-size:26px;line-height:1.05;margin:0 0 6px;}
+  .pick__by{font-size:15px;color:var(--ink-muted);margin:0 0 12px;}
+  .pick__actions{display:flex;flex-direction:column;gap:10px;align-items:flex-start;}
+  .demo-note{font-size:13px;color:var(--ink-muted);margin:0;max-width:30ch;}
+  .status{
+    font-family:var(--mono);font-size:13px;letter-spacing:.02em;
+    border-top:3px solid var(--ink);margin:16px 0 0;padding-top:12px;overflow-wrap:anywhere;
+  }
+
+  /* ---------- crate form ---------- */
+  .crate{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.85fr);gap:24px;margin-top:20px;}
+  .field{display:flex;flex-direction:column;gap:8px;min-width:0;}
+  .crate label,.crate legend,.field label{
+    font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  }
+  .field input,.field select{
+    width:100%;font:400 16px/1.4 var(--body);color:var(--ink);
+    padding:12px 14px;border:3px solid var(--ink);border-radius:2px;background:var(--paper);
+    transition:background-color 120ms ease-out;
+  }
+  .field input::placeholder{color:var(--ink-muted);}
+  .field input:hover,.field select:hover{background:#FFF8E7;}
+  .chips{border:0;margin:20px 0 0;padding:0;min-width:0;}
+  .chips legend{padding:0;margin-bottom:10px;}
+  .chips__row{display:flex;flex-wrap:wrap;gap:10px;}
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+    font-size:15px;background:var(--paper);border:3px solid var(--ink);
+    border-radius:999px;padding:8px 14px;
+    transition:background-color 120ms ease-out;
+  }
+  .chip:hover{background:var(--ochre);}
+  .chip:has(input:checked){background:var(--ochre);}
+  .chip input{
+    appearance:none;-webkit-appearance:none;flex:none;
+    width:20px;height:20px;margin:0;border:3px solid var(--ink);border-radius:2px;
+    background:var(--paper-deep);
+  }
+  .chip input:checked{background:var(--rust);box-shadow:inset 0 0 0 3px var(--paper);}
+  .switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;}
+  .switch input{
+    appearance:none;-webkit-appearance:none;flex:none;margin:0;position:relative;
+    width:52px;height:28px;border:3px solid var(--ink);border-radius:999px;background:var(--paper);
+    transition:background-color 120ms ease-out;
+  }
+  .switch input::after{
+    content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;
+    background:var(--ink);transition:transform 160ms cubic-bezier(.2,.8,.3,1);
+  }
+  .switch input:checked{background:var(--rust);}
+  .switch input:checked::after{transform:translateX(24px);}
+  .crate__row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:24px;}
+  .crate__status{
+    font-family:var(--mono);font-size:13px;border-top:3px solid var(--ink);
+    margin-top:20px;padding-top:12px;overflow-wrap:anywhere;
+  }
+
+  /* ---------- record cards ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:24px;margin-top:24px;}
+  .card{
+    display:flex;flex-direction:column;min-width:0;background:var(--paper);
+    border:3px solid var(--ink);border-radius:2px;box-shadow:6px 6px 0 var(--ink);
+    transition:transform 160ms cubic-bezier(.2,.8,.3,1),box-shadow 160ms cubic-bezier(.2,.8,.3,1);
+  }
+  .card:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--ochre);}
+  .card:focus-within{box-shadow:8px 8px 0 var(--ochre);}
+  .sleeve{position:relative;aspect-ratio:1/1;border-bottom:3px solid var(--ink);background:var(--paper-deep);overflow:hidden;}
+  .sleeve::before{content:"";position:absolute;inset:0;}
+  .sleeve--a::before{background:repeating-linear-gradient(0deg,
+    var(--ochre) 0,var(--ochre) 16px,transparent 16px,transparent 34px);}
+  .sleeve--b::before{background:repeating-linear-gradient(90deg,
+    var(--rust) 0,var(--rust) 20px,transparent 20px,transparent 44px);}
+  .sleeve--c::before{background:radial-gradient(circle at 50% 50%,
+    var(--rust) 0,var(--rust) 14%,var(--paper-deep) 14%,var(--paper-deep) 26%,
+    var(--ochre) 26%,var(--ochre) 40%,var(--paper-deep) 40%,var(--paper-deep) 52%,
+    var(--avocado) 52%,var(--avocado) 66%,var(--paper-deep) 66%,var(--paper-deep) 100%);}
+  .sleeve--d::before{background:repeating-linear-gradient(45deg,
+    var(--avocado) 0,var(--avocado) 18px,transparent 18px,transparent 40px);}
+  .sleeve--e::before{background:radial-gradient(circle at 50% 50%,
+      var(--paper) 0,var(--paper) 20%,transparent 20%,transparent 100%),
+    linear-gradient(180deg,var(--ochre) 0,var(--ochre) 50%,var(--rust) 50%,var(--rust) 100%);}
+  .sleeve--f::before{background:repeating-linear-gradient(0deg,
+      var(--rust) 0,var(--rust) 10px,transparent 10px,transparent 26px),
+    repeating-linear-gradient(90deg,var(--ochre) 0,var(--ochre) 10px,transparent 10px,transparent 26px);}
+  .card__mark{
+    position:absolute;right:12px;bottom:12px;width:54px;height:54px;border-radius:50%;
+    border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);
+    background:radial-gradient(circle at 50% 50%,
+      var(--paper) 0,var(--paper) 8%,
+      var(--rust) 8%,var(--rust) 26%,
+      var(--ink) 26%,var(--ink) 33%,
+      var(--ochre) 33%,var(--ochre) 37%,
+      var(--ink) 37%,var(--ink) 100%);
+  }
+  .card__body{display:flex;flex-direction:column;gap:10px;padding:20px;flex:1;min-width:0;}
+  .card__title{font-size:21px;}
+  .card__artist{font-size:15px;color:var(--ink-muted);margin:0;overflow-wrap:anywhere;}
+  .card__meta{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--ink-muted);margin:0;overflow-wrap:anywhere;}
+  .card__foot{
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+    margin-top:auto;padding-top:12px;border-top:3px solid var(--ink);
+  }
+  .card__price{font-family:var(--mono);font-weight:700;font-size:17px;margin:0;white-space:nowrap;}
+  .note{font-size:13px;color:var(--ink-muted);margin-top:16px;max-width:68ch;}
+
+  /* ---------- shelf rows ---------- */
+  .shelf{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:16px;}
+  .row{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;
+    background:var(--paper);border:3px solid var(--ink);border-radius:2px;padding:20px;
+    box-shadow:5px 5px 0 var(--ink);min-width:0;
+    transition:transform 160ms cubic-bezier(.2,.8,.3,1),box-shadow 160ms cubic-bezier(.2,.8,.3,1);
+  }
+  .row:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ochre);}
+  .row__title{font-size:19px;}
+  .row__note{font-size:15px;color:var(--ink-muted);margin:6px 0 0;max-width:60ch;}
+  .row__side{display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
+
+  /* ---------- footer ---------- */
+  .foot{background:var(--ink);color:var(--paper);padding:48px 0;border-top:3px solid var(--ink);}
+  .foot h2{text-shadow:2px 2px 0 var(--rust);}
+  .foot h3{font-size:19px;letter-spacing:.02em;}
+  .foot__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px;margin-top:24px;}
+  .foot p,.foot li{font-size:15px;color:var(--paper);}
+  .foot__muted{font-size:13px;color:var(--cream-muted);}
+  .foot .meta li{border-bottom-color:rgba(247,235,211,.35);}
+  .foot .meta b{color:var(--cream-muted);}
+  .foot__addr{overflow-wrap:anywhere;margin:8px 0 0;}
+
+  @media (max-width:1024px){
+    .grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));}
+  }
+  @media (max-width:860px){
+    .split{grid-template-columns:minmax(0,1fr);gap:32px;}
+    .band{padding:40px 0;}
+  }
+  @media (max-width:620px){
+    .grid{grid-template-columns:minmax(0,1fr);}
+    .crate{grid-template-columns:minmax(0,1fr);}
+    .pick{grid-template-columns:minmax(0,1fr);gap:20px;}
+    .pick__actions{align-items:stretch;}
+    .btn{width:100%;}
+    .row{grid-template-columns:minmax(0,1fr);}
+    .row__side{align-items:flex-start;}
+    .hours{gap:10px 20px;}
+    .hours > div{width:100%;}
+    .shopfront__top{align-items:flex-start;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{
+      transition-duration:0.01ms !important;
+      animation-duration:0.01ms !important;
+      animation-iteration-count:1 !important;
+      scroll-behavior:auto !important;
+    }
+    .card:hover,.row:hover,.link-allstyles:hover,.btn:hover,.btn:active{transform:none !important;}
+    .card:hover,.row:hover{box-shadow:6px 6px 0 var(--ink) !important;}
+    .btn:hover{box-shadow:5px 5px 0 var(--ink) !important;}
+    .switch input:checked::after{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the crates</a>
+
+<div class="stripe-band" aria-hidden="true"></div>
+
+<header class="shopfront">
+  <div class="wrap">
+    <div class="shopfront__top">
+      <div>
+        <p class="kicker">Est. 1974 · Twelve-inch specialists · Cinderford</p>
+        <h1>Marlowe Records</h1>
+      </div>
+      <nav aria-label="Preview pages">
+        <a class="link-allstyles" href="index.html">All styles</a>
+      </nav>
+    </div>
+    <p class="tagline">Second-hand crates, fresh pressings and a listening booth that still smells faintly of patchouli. The racks are alphabetised, the staff are not — ask for Della if you want an argument about sleeve grading.</p>
+    <dl class="hours">
+      <div><dt>Mon–Thu</dt><dd>10:00–18:00</dd></div>
+      <div><dt>Fri</dt><dd>10:00–20:00 · late listening</dd></div>
+      <div><dt>Sat</dt><dd>09:00–18:00 · crate day</dd></div>
+      <div><dt>Sun</dt><dd>11:00–16:00</dd></div>
+    </dl>
+  </div>
+</header>
+
+<div class="stripe-band" aria-hidden="true"></div>
+
+<main id="main">
+
+  <section class="band" aria-labelledby="feature-heading">
+    <div class="wrap">
+      <p class="tag">Vinyl of the week · sleeve 067</p>
+      <h2 id="feature-heading">A folk-rock record that sounds like a hot afternoon</h2>
+      <p class="lede">Pressed once in 1976, forgotten, then re-cut from the original tapes. Twelve tracks of close-miked acoustics, a brass section that arrives unfashionably late, and a drummer who refuses to hurry.</p>
+
+      <div class="split">
+        <div>
+          <svg class="disc" viewBox="0 0 300 300" role="img" aria-labelledby="disc-title disc-desc">
+            <title id="disc-title">Concentric record motif for Copper Season by Ferrous Holler</title>
+            <desc id="disc-desc">A flat-printed vinyl record drawn in rings: an ink disc, stacked groove rings in ochre and rust, and an ochre centre label reading Marlowe Records, Copper Season, HMR 067, 45 rpm.</desc>
+            <circle cx="150" cy="150" r="146" fill="#3B2A1E"/>
+            <g fill="none" stroke="#8A6743" stroke-width="1">
+              <circle cx="150" cy="150" r="138"/>
+              <circle cx="150" cy="150" r="132"/>
+              <circle cx="150" cy="150" r="126"/>
+              <circle cx="150" cy="150" r="120"/>
+              <circle cx="150" cy="150" r="114"/>
+              <circle cx="150" cy="150" r="108"/>
+              <circle cx="150" cy="150" r="102"/>
+              <circle cx="150" cy="150" r="96"/>
+              <circle cx="150" cy="150" r="90"/>
+              <circle cx="150" cy="150" r="84"/>
+              <circle cx="150" cy="150" r="78"/>
+            </g>
+            <g fill="none">
+              <circle cx="150" cy="150" r="129" stroke="#D9971F" stroke-width="3"/>
+              <circle cx="150" cy="150" r="111" stroke="#B4461F" stroke-width="3"/>
+              <circle cx="150" cy="150" r="93" stroke="#D9971F" stroke-width="3"/>
+            </g>
+            <circle cx="150" cy="150" r="64" fill="#D9971F" stroke="#3B2A1E" stroke-width="4"/>
+            <circle cx="150" cy="150" r="52" fill="none" stroke="#B4461F" stroke-width="2"/>
+            <text x="150" y="128" text-anchor="middle" font-family="Courier New, monospace" font-size="10" letter-spacing="1.5" fill="#3B2A1E">MARLOWE RECORDS</text>
+            <text x="150" y="152" text-anchor="middle" font-family="Rockwell, Georgia, serif" font-size="17" font-weight="700" fill="#3B2A1E">Copper Season</text>
+            <text x="150" y="172" text-anchor="middle" font-family="Courier New, monospace" font-size="9" letter-spacing="1" fill="#3B2A1E">HMR 067 · 45 RPM</text>
+            <circle cx="150" cy="150" r="6" fill="#F7EBD3" stroke="#3B2A1E" stroke-width="2"/>
+          </svg>
+        </div>
+
+        <div>
+          <p class="card__tags">
+            <span class="pill pill--avocado">Folk-rock</span>
+            <span class="pill">Reissue</span>
+            <span class="pill pill--rust">On the booth deck</span>
+          </p>
+          <p class="feature__title" style="margin-top:14px">Copper Season</p>
+          <p class="feature__by">Ferrous Holler · 1976, re-cut 2024 · Harrow Meadow</p>
+          <ul class="meta">
+            <li><b>Cat no.</b><span>HMR 067</span></li>
+            <li><b>Pressing</b><span>180g black, 2024 re-cut from the original tapes</span></li>
+            <li><b>Sleeve</b><span>Hand-lettered gatefold, liner notes by the bass player</span></li>
+            <li><b>Grade</b><span>New — sealed, shop copy in the booth is open</span></li>
+          </ul>
+          <p class="price-pill">£24 <small>members £21 · one per crate</small></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stripe-band" aria-hidden="true"></div>
+
+  <section class="band band--ochre" aria-labelledby="pick-heading">
+    <div class="wrap">
+      <p class="tag">Counter notice</p>
+      <h2 id="pick-heading">Staff pick of the day</h2>
+      <p class="lede">Whoever unlocks the shop picks the record that plays until noon. It gets a handwritten card in the window and a ten per cent discount until closing.</p>
+
+      <div class="pick" style="margin-top:24px">
+        <span class="pick__disc" aria-hidden="true"></span>
+        <div>
+          <p class="pick__label">Now on the counter deck</p>
+          <p class="pick__title" id="pick-title">Copper Season</p>
+          <p class="pick__by">by <span id="pick-artist">Ferrous Holler</span> · <span id="pick-year">1976</span></p>
+          <p class="price-pill">£<span id="pick-price">24</span> <small>staff pick price until 18:00</small></p>
+        </div>
+        <div class="pick__actions">
+          <button class="btn btn--primary" type="button" id="demo-action" aria-label="Demo: shuffle the staff pick of the day">Shuffle the pick (demo)</button>
+          <button class="btn btn--ghost" type="button" disabled>Booth queue: 20 min</button>
+          <p class="demo-note">Interactive demo — the pick changes on this page only.</p>
+        </div>
+      </div>
+
+      <p class="status" id="demo-status" role="status" aria-live="polite">Demo: staff pick is Copper Season by Ferrous Holler (1976), £24.</p>
+    </div>
+  </section>
+
+  <section class="band band--deep" aria-labelledby="crate-heading">
+    <div class="wrap">
+      <p class="tag">Crate room · ground floor</p>
+      <h2 id="crate-heading">Dig the crates</h2>
+      <p class="lede">Four thousand records, sorted by shelf rather than by mood. Describe what you are after and we will narrow the racks before you get your hands dusty.</p>
+
+      <form id="crate-form" novalidate>
+        <div class="crate">
+          <div class="field">
+            <label for="crate-search">Dig the crates</label>
+            <input type="search" id="crate-search" name="q" placeholder="Try dub, brass, 1976, HMR 067…" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="genre-filter">Genre</label>
+            <select id="genre-filter" name="genre">
+              <option value="all">Every shelf</option>
+              <option value="folk">Folk-rock</option>
+              <option value="soul">Soul &amp; funk</option>
+              <option value="jazz">Jazz</option>
+              <option value="dub">Dub &amp; reggae</option>
+              <option value="psych">Psych-rock</option>
+              <option value="brass">Brass band</option>
+            </select>
+          </div>
+        </div>
+
+        <fieldset class="chips">
+          <legend>Only show me</legend>
+          <div class="chips__row">
+            <label class="chip"><input type="checkbox" name="format" value="original">Original pressings</label>
+            <label class="chip"><input type="checkbox" name="format" value="reissue">Reissues</label>
+          </div>
+        </fieldset>
+
+        <div class="crate__row">
+          <label class="switch" for="crate-stock">
+            <input type="checkbox" id="crate-stock" checked>
+            <span>In stock only</span>
+          </label>
+          <button class="btn btn--primary" type="submit">Show matching crates</button>
+          <button class="btn btn--ghost" type="reset" id="crate-reset">Clear the filter</button>
+        </div>
+      </form>
+
+      <p class="crate__status" id="crate-status" role="status" aria-live="polite">Showing 5 of 6 records. Filtering runs locally in this page.</p>
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="arrivals-heading">
+    <div class="wrap">
+      <p class="tag">New arrivals · priced this morning</p>
+      <h2 id="arrivals-heading">This week in the racks</h2>
+      <p class="lede">Every record below was graded by hand, played through once on the shop deck, and priced in pencil on the back of the sleeve.</p>
+
+      <div class="grid">
+        <article class="card" data-record data-genre="folk" data-format="reissue" data-stock="yes">
+          <div class="sleeve sleeve--a" aria-hidden="true"><span class="card__mark"></span></div>
+          <div class="card__body">
+            <p class="card__tags"><span class="pill pill--avocado">Folk-rock</span><span class="pill">Reissue</span></p>
+            <h3 class="card__title">Copper Season</h3>
+            <p class="card__artist">Ferrous Holler</p>
+            <p class="card__meta">HMR 067 · 1976 · re-cut 2024, sealed</p>
+            <div class="card__foot">
+              <p class="card__price">£24</p>
+              <button class="btn btn--ghost btn--sm" type="button" aria-pressed="false" data-crate>Add to crate list</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card" data-record data-genre="soul" data-format="original" data-stock="yes">
+          <div class="sleeve sleeve--b" aria-hidden="true"><span class="card__mark"></span></div>
+          <div class="card__body">
+            <p class="card__tags"><span class="pill pill--avocado">Soul &amp; funk</span><span class="pill">Original</span></p>
+            <h3 class="card__title">Nightbus Hymns</h3>
+            <p class="card__artist">The Dulcet Hours</p>
+            <p class="card__meta">NBR 112 · 1974 · first press, name on label</p>
+            <div class="card__foot">
+              <p class="card__price">£18</p>
+              <button class="btn btn--ghost btn--sm" type="button" aria-pressed="false" data-crate>Add to crate list</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card" data-record data-genre="jazz" data-format="original" data-stock="no">
+          <div class="sleeve sleeve--c" aria-hidden="true"><span class="card__mark"></span></div>
+          <div class="card__body">
+            <p class="card__tags"><span class="pill pill--avocado">Jazz</span><span class="pill pill--rust">On hold</span></p>
+            <h3 class="card__title">Saffron Fair</h3>
+            <p class="card__artist">Marina Voss Trio</p>
+            <p class="card__meta">SAF 004 · 1978 · held for a customer until Friday</p>
+            <div class="card__foot">
+              <p class="card__price">£31</p>
+              <button class="btn btn--ghost btn--sm" type="button" aria-pressed="false" data-crate>Add to crate list</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card" data-record data-genre="psych" data-format="reissue" data-stock="yes">
+          <div class="sleeve sleeve--d" aria-hidden="true"><span class="card__mark"></span></div>
+          <div class="card__body">
+            <p class="card__tags"><span class="pill pill--avocado">Psych-rock</span><span class="pill">Reissue</span></p>
+            <h3 class="card__title">Petrol &amp; Pines</h3>
+            <p class="card__artist">Kestrel County</p>
+            <p class="card__meta">KST 021 · 1975 · gatefold, poster intact</p>
+            <div class="card__foot">
+              <p class="card__price">£22</p>
+              <button class="btn btn--ghost btn--sm" type="button" aria-pressed="false" data-crate>Add to crate list</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card" data-record data-genre="dub" data-format="original" data-stock="yes">
+          <div class="sleeve sleeve--e" aria-hidden="true"><span class="card__mark"></span></div>
+          <div class="card__body">
+            <p class="card__tags"><span class="pill pill--avocado">Dub &amp; reggae</span><span class="pill">Original</span></p>
+            <h3 class="card__title">Root Cellar Vol. 2</h3>
+            <p class="card__artist">Various artists</p>
+            <p class="card__meta">RTC 202 · 1977 · six tracks, heavy bass cut</p>
+            <div class="card__foot">
+              <p class="card__price">£16</p>
+              <button class="btn btn--ghost btn--sm" type="button" aria-pressed="false" data-crate>Add to crate list</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card" data-record data-genre="brass" data-format="reissue" data-stock="yes">
+          <div class="sleeve sleeve--f" aria-hidden="true"><span class="card__mark"></span></div>
+          <div class="card__body">
+            <p class="card__tags"><span class="pill pill--avocado">Brass band</span><span class="pill">Reissue</span></p>
+            <h3 class="card__title">Brassy Weather</h3>
+            <p class="card__artist">Ollanby Brass Band</p>
+            <p class="card__meta">OBB 019 · 1973 · library sleeve, ex-shop stock</p>
+            <div class="card__foot">
+              <p class="card__price">£19</p>
+              <button class="btn btn--ghost btn--sm" type="button" aria-pressed="false" data-crate>Add to crate list</button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <p class="note">Crate list buttons only mark this page — nothing is saved, reserved or sent anywhere.</p>
+    </div>
+  </section>
+
+  <section class="band band--deep" aria-labelledby="picks-heading">
+    <div class="wrap">
+      <p class="tag">Annotated by the staff</p>
+      <h2 id="picks-heading">Three records we keep recommending</h2>
+      <ul class="shelf">
+        <li class="row">
+          <div>
+            <h3 class="row__title">The Longshore Lament — Ivy Croom (1972)</h3>
+            <p class="row__note">Della: sounds like a wet Tuesday in a bus shelter, and the pedal steel on side B is worth the whole record. Played at least twice a week on the shop deck.</p>
+          </div>
+          <div class="row__side">
+            <p class="card__price">£27</p>
+            <p class="pill">Shelf F2</p>
+          </div>
+        </li>
+        <li class="row">
+          <div>
+            <h3 class="row__title">Half-Light Assembly — The Rueful Tones (1975)</h3>
+            <p class="row__note">Mo: four tracks, no padding, and a horn section recorded in a stairwell. Take it into the booth before you decide — nobody buys this one on the first listen.</p>
+          </div>
+          <div class="row__side">
+            <p class="card__price">£21</p>
+            <p class="pill">Shelf A4</p>
+          </div>
+        </li>
+        <li class="row">
+          <div>
+            <h3 class="row__title">Copper Wires — Ansel Rook (1979)</h3>
+            <p class="row__note">Ravi: late-period folk with a synth the label clearly regretted. Only pressing we have seen with the insert still stapled in.</p>
+          </div>
+          <div class="row__side">
+            <p class="card__price">£34</p>
+            <p class="pill">Shelf C1</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<div class="stripe-band" aria-hidden="true"></div>
+
+<footer class="foot">
+  <div class="wrap">
+    <p class="tag">Come and dig through it</p>
+    <h2>Marlowe Records, open seven days</h2>
+    <div class="foot__grid">
+      <div>
+        <h3>Visit</h3>
+        <p class="foot__addr">Warren's Yard, 148 Wilbury Parade,<br>Cinderford CD4 2LP<br>(fictional address, invented for this preview)</p>
+      </div>
+      <div>
+        <h3>Call</h3>
+        <p>01234 567 890 <span class="foot__muted">(fictional number)</span></p>
+        <p>Ask for the crate room. We do not take reservations over the phone.</p>
+      </div>
+      <div>
+        <h3>Shop notes</h3>
+        <ul class="meta" style="border:0">
+          <li><b>Grades</b><span>VG+ / EX / NM, marked in pencil</span></li>
+          <li><b>Trades</b><span>Saturdays, duplicates only, cash or credit</span></li>
+          <li><b>Booth</b><span>Two decks, 20-minute slots, headphones on request</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="foot__muted" style="margin-top:24px">Marlowe Records is a fictional shop built as a design preview. The shuffle button changes this page only; nothing is stored or sent.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var picks = [
+    { title: "Copper Season", artist: "Ferrous Holler", year: "1976", price: "24" },
+    { title: "Nightbus Hymns", artist: "The Dulcet Hours", year: "1974", price: "18" },
+    { title: "Saffron Fair", artist: "Marina Voss Trio", year: "1978", price: "31" },
+    { title: "Root Cellar Vol. 2", artist: "Various artists", year: "1977", price: "16" }
+  ];
+  var pickIndex = 0;
+  var pickTitle = document.getElementById("pick-title");
+  var pickArtist = document.getElementById("pick-artist");
+  var pickYear = document.getElementById("pick-year");
+  var pickPrice = document.getElementById("pick-price");
+  var demoStatus = document.getElementById("demo-status");
+
+  document.getElementById("demo-action").addEventListener("click", function () {
+    pickIndex = (pickIndex + 1) % picks.length;
+    var pick = picks[pickIndex];
+    pickTitle.textContent = pick.title;
+    pickArtist.textContent = pick.artist;
+    pickYear.textContent = pick.year;
+    pickPrice.textContent = pick.price;
+    demoStatus.textContent = "Demo: staff pick is " + pick.title + " by " + pick.artist + " (" + pick.year + "), £" + pick.price + ".";
+  });
+
+  var form = document.getElementById("crate-form");
+  var search = document.getElementById("crate-search");
+  var genre = document.getElementById("genre-filter");
+  var stock = document.getElementById("crate-stock");
+  var crateStatus = document.getElementById("crate-status");
+  var cards = Array.prototype.slice.call(document.querySelectorAll("[data-record]"));
+
+  function apply() {
+    var query = search.value.trim().toLowerCase();
+    var chosenGenre = genre.value;
+    var formats = Array.prototype.slice.call(form.querySelectorAll("input[name='format']:checked")).map(function (box) {
+      return box.value;
+    });
+    var shown = 0;
+    cards.forEach(function (card) {
+      var matches = (chosenGenre === "all" || card.getAttribute("data-genre") === chosenGenre) &&
+        (!query || card.textContent.toLowerCase().indexOf(query) !== -1) &&
+        (!formats.length || formats.indexOf(card.getAttribute("data-format")) !== -1) &&
+        (!stock.checked || card.getAttribute("data-stock") === "yes");
+      card.hidden = !matches;
+      if (matches) { shown++; }
+    });
+    crateStatus.textContent = "Showing " + shown + " of " + cards.length + " records. Filtering runs locally in this page.";
+  }
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    apply();
+  });
+  form.addEventListener("reset", function () {
+    window.setTimeout(apply, 0);
+  });
+  Array.prototype.slice.call(form.querySelectorAll("input, select")).forEach(function (control) {
+    control.addEventListener("change", apply);
+  });
+
+  Array.prototype.slice.call(document.querySelectorAll("[data-crate]")).forEach(function (button) {
+    button.addEventListener("click", function () {
+      var on = button.getAttribute("aria-pressed") !== "true";
+      button.setAttribute("aria-pressed", on ? "true" : "false");
+      button.textContent = on ? "In crate list" : "Add to crate list";
+    });
+  });
+
+  apply();
+})();
+</script>
+</body>
+</html>

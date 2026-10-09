@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview — Editorial Literary Magazine</title>
+<style>
+  :root{
+    --ivory:#f6f1e4;
+    --paper:#fbf8f1;
+    --ink:#16130f;
+    --ink-soft:#4a443b;
+    --ink-faint:#8b8375;
+    --vermillion:#c2442c;      /* decorative rules, display marks */
+    --vermillion-ink:#a3361f;  /* small text, links (6.0:1 on ivory) */
+    --rule:rgba(22,19,15,.22);
+    --rule-soft:rgba(22,19,15,.12);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
+    --sans:ui-sans-serif,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --measure:34rem;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--ivory);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:17px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .wrap{width:min(1180px,100% - 2.5rem);margin-inline:auto;}
+  a{color:var(--vermillion-ink);text-underline-offset:.18em;text-decoration-thickness:.06em;}
+  :focus-visible{outline:2px solid var(--vermillion);outline-offset:3px;}
+
+  /* ---------- utility bar ---------- */
+  .utilbox{
+    border-bottom:1px solid var(--rule);
+    background:var(--paper);
+    font-family:var(--sans);
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+  }
+  .utilbox .wrap{display:flex;justify-content:space-between;align-items:center;gap:1rem;min-height:2.6rem;flex-wrap:wrap;}
+  .all-styles{
+    display:inline-flex;align-items:center;gap:.45rem;
+    color:var(--vermillion-ink);text-decoration:none;font-weight:700;
+    border:1px solid var(--rule);padding:.35rem .6rem;border-radius:2px;background:var(--ivory);
+  }
+  .all-styles:hover{background:var(--vermillion);color:var(--ivory);border-color:var(--vermillion);}
+  .util-meta{color:var(--ink-faint);}
+
+  /* ---------- masthead ---------- */
+  .masthead{padding:2.4rem 0 1rem;border-bottom:3px double var(--ink);}
+  .masthead .kicker{
+    font-family:var(--sans);font-size:.7rem;letter-spacing:.34em;text-transform:uppercase;
+    color:var(--vermillion-ink);margin:0 0 .7rem;
+  }
+  .masthead h1{
+    font-size:clamp(2.5rem,8.4vw,5.6rem);
+    line-height:.92;letter-spacing:-.015em;font-weight:600;
+    margin:0;text-align:center;font-variant-ligatures:common-ligatures;
+  }
+  .masthead h1 em{font-style:italic;color:var(--vermillion-ink);}
+  .folio{
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    font-family:var(--sans);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-soft);padding-top:1rem;
+  }
+
+  /* ---------- feature: asymmetric composition ---------- */
+  .feature{
+    display:grid;
+    grid-template-columns:repeat(12,minmax(0,1fr));
+    gap:0 2rem;
+    padding:2.4rem 0 1.2rem;
+    border-bottom:1px solid var(--rule);
+  }
+  .feature-head{grid-column:1 / span 8;min-width:0;}
+  .feature-art{grid-column:9 / span 4;min-width:0;}
+  .feature-body{
+    grid-column:1 / span 7;
+    min-width:0;
+    margin-top:1.8rem;
+    columns:2;
+    column-gap:2.1rem;
+    column-rule:1px solid var(--rule);
+  }
+  .feature-aside{grid-column:9 / span 4;min-width:0;margin-top:1.8rem;}
+
+  .story-kicker{
+    font-family:var(--sans);font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--vermillion-ink);margin:0 0 .8rem;display:flex;align-items:center;gap:.7rem;
+  }
+  .story-kicker::after{content:"";height:2px;flex:1;background:var(--vermillion);}
+  .story h2{
+    font-size:clamp(2rem,5.2vw,3.4rem);line-height:1.02;margin:0 0 .7rem;font-weight:600;letter-spacing:-.01em;
+    text-wrap:balance;
+  }
+  .dek{font-size:1.22rem;line-height:1.4;color:var(--ink-soft);font-style:italic;margin:0 0 1rem;max-width:var(--measure);}
+  .byline{font-family:var(--sans);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin:0;}
+
+  .feature-body p{margin:0 0 1em;break-inside:avoid-column;max-width:var(--measure);}
+  .feature-body p:first-of-type::first-letter{
+    float:left;font-size:3.9em;line-height:.78;padding:.06em .1em 0 0;
+    color:var(--vermillion);font-weight:600;
+  }
+  .feature-body p:first-of-type{text-indent:0;}
+
+  .plate{
+    border:1px solid var(--ink);background:var(--paper);padding:.5rem;
+  }
+  .plate svg{display:block;width:100%;height:auto;}
+  .plate figcaption{
+    font-family:var(--sans);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--ink-soft);padding-top:.55rem;border-top:1px solid var(--rule-soft);margin-top:.5rem;
+  }
+
+  blockquote.pull{
+    margin:0;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);
+    padding:1.1rem 0 .9rem;
+  }
+  blockquote.pull p{font-size:1.3rem;line-height:1.32;font-style:italic;margin:0 0 .7rem;}
+  blockquote.pull cite{font-family:var(--sans);font-style:normal;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);}
+
+  /* ---------- sidebar list ---------- */
+  .alsos h3{
+    font-family:var(--sans);font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
+    margin:0 0 .2rem;padding-bottom:.5rem;border-bottom:2px solid var(--ink);
+  }
+  .alsos ol{list-style:none;margin:0;padding:0;counter-reset:also;}
+  .alsos li{counter-increment:also;border-bottom:1px solid var(--rule-soft);padding:.75rem 0;}
+  .alsos li::before{content:counter(also,decimal-leading-zero);font-family:var(--sans);font-size:.66rem;color:var(--vermillion-ink);letter-spacing:.1em;display:block;}
+  .alsos .t{font-size:1.05rem;line-height:1.25;margin:.15rem 0 .2rem;}
+  .alsos .m{font-family:var(--sans);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);}
+
+  /* ---------- demo strip ---------- */
+  .demo{
+    border-bottom:1px solid var(--rule);
+    background:var(--paper);
+  }
+  .demo .wrap{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem 2rem;align-items:center;
+    padding:1rem 0;
+  }
+  .demo-label{font-family:var(--sans);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--vermillion-ink);margin:0 0 .25rem;}
+  .demo p.note{font-family:var(--sans);font-size:.8rem;color:var(--ink-soft);margin:0;line-height:1.4;max-width:44ch;}
+  select#demo-action{
+    font-family:var(--sans);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;
+    padding:.6rem 2.2rem .6rem .7rem;border:1px solid var(--ink);border-radius:2px;
+    background:var(--ivory) url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2316130f'/%3E%3C/svg%3E") no-repeat right .75rem center;
+    color:var(--ink);appearance:none;cursor:pointer;
+  }
+
+  /* ---------- component area ---------- */
+  .components{padding:2.4rem 0 3rem;display:grid;gap:2.2rem;grid-template-columns:repeat(12,minmax(0,1fr));}
+  .comp-col{grid-column:span 4;min-width:0;}
+  .comp-col.wide{grid-column:span 4;}
+  .comp h4,.comp-col h4{
+    font-family:var(--sans);font-size:.72rem;letter-spacing:.26em;text-transform:uppercase;
+    margin:0 0 .9rem;padding-bottom:.5rem;border-bottom:1px solid var(--rule);color:var(--ink-soft);
+  }
+  .card-stack{display:grid;gap:.9rem;}
+  .card{border:1px solid var(--rule);background:var(--paper);padding:1rem 1.1rem;border-radius:2px;}
+  .card h5{margin:0 0 .3rem;font-size:1.12rem;font-weight:600;}
+  .card .m{font-family:var(--sans);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 .5rem;}
+  .card p{margin:0;color:var(--ink-soft);font-size:.95rem;line-height:1.5;}
+
+  .btn{
+    font-family:var(--sans);font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;
+    padding:.78rem 1.3rem;border:1px solid var(--ink);background:var(--ink);color:var(--ivory);
+    border-radius:2px;cursor:pointer;
+  }
+  .btn:hover{background:var(--vermillion);border-color:var(--vermillion);}
+  .btn.ghost{background:transparent;color:var(--ink);}
+  .btn.ghost:hover{background:var(--ink);color:var(--ivory);border-color:var(--ink);}
+
+  form.subscribe{display:grid;gap:.7rem;max-width:24rem;grid-template-columns:minmax(0,1fr);}
+  label.fl{font-family:var(--sans);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);}
+  input[type=email]{
+    font-family:var(--sans);font-size:.9rem;padding:.7rem .75rem;border:1px solid var(--ink);
+    background:var(--paper);border-radius:2px;color:var(--ink);width:100%;min-width:0;
+  }
+  input[type=email]::placeholder{color:var(--ink-faint);}
+  .form-msg{font-family:var(--sans);font-size:.78rem;color:var(--vermillion-ink);margin:.2rem 0 0;min-height:1.2em;}
+
+  footer.colophon{
+    border-top:3px double var(--ink);padding:1.6rem 0 2.6rem;
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    font-family:var(--sans);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
+  }
+
+  @media (max-width:900px){
+    .feature,.components{grid-template-columns:minmax(0,1fr);}
+    .feature{gap:0;}
+    .components{gap:2rem;}
+    .feature-head,.feature-art,.feature-body,.feature-aside,.comp-col,.comp-col.wide{grid-column:1;}
+    .feature-art{margin-top:1.6rem;}
+    .feature-body{columns:1;}
+  }
+  @media (max-width:520px){
+    body{font-size:16px;}
+    .utilbox .wrap{min-height:0;padding:.6rem 0;}
+    .masthead{padding-top:1.6rem;}
+    .plate{padding:.35rem;}
+    blockquote.pull p{font-size:1.15rem;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important;scroll-behavior:auto!important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="utilbox">
+  <div class="wrap">
+    <a class="all-styles" href="index.html">&larr; All styles</a>
+    <span class="util-meta">Vol. xii &middot; No. 4 &middot; Autumn</span>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="kicker">A quarterly of fiction, essays &amp; verse</p>
+    <h1>The Ivory <em>Quill</em></h1>
+    <p class="folio">
+      <span>Established&nbsp;1974</span>
+      <span>Cover price &mdash; three dollars</span>
+      <span>Printed letterpress, Chicago</span>
+    </p>
+  </div>
+</header>
+
+<main>
+  <article class="feature story wrap" aria-labelledby="lead-headline">
+    <div class="feature-head">
+      <p class="story-kicker" id="lead-kicker">Fiction</p>
+      <h2 id="lead-headline">The Salt Cartographer</h2>
+      <p class="dek" id="lead-dek">A surveyor maps a coastline that refuses to stay put.</p>
+      <p class="byline" id="lead-byline">Nadia Erram &middot; 4,200 words</p>
+    </div>
+
+    <figure class="feature-art plate">
+      <svg viewBox="0 0 320 400" role="img" aria-label="Engraving of a surveyor's compass over a shifting coastline of hatched waves.">
+        <rect width="320" height="400" fill="#fbf8f1"/>
+        <g stroke="#16130f" stroke-width="1" fill="none" opacity=".85">
+          <path d="M20 120 C70 96 120 140 170 116 S270 92 300 108"/>
+          <path d="M20 132 C70 108 120 152 170 128 S270 104 300 120"/>
+          <path d="M20 300 C80 276 130 320 190 296 S280 272 300 288"/>
+          <path d="M20 312 C80 288 130 332 190 308 S280 284 300 300"/>
+        </g>
+        <g stroke="#c2442c" stroke-width="1.4" fill="none">
+          <circle cx="160" cy="212" r="58"/>
+          <path d="M160 154 L160 270 M102 212 L218 212"/>
+          <path d="M160 212 L206 166"/>
+        </g>
+        <g stroke="#16130f" stroke-width="1" fill="none">
+          <path d="M160 200 L168 212 L160 224 L152 212 Z" fill="#c2442c" stroke="none"/>
+          <circle cx="160" cy="212" r="3" fill="#16130f" stroke="none"/>
+        </g>
+        <g stroke="#16130f" stroke-width="1" opacity=".5">
+          <path d="M24 60 h44 M24 68 h28"/>
+          <path d="M252 340 h44 M252 348 h28"/>
+          <path d="M24 356 h90"/>
+        </g>
+        <text x="160" y="384" text-anchor="middle" font-family="Georgia,serif" font-size="11" letter-spacing="3" fill="#4a443b">PLATE I</text>
+      </svg>
+      <figcaption>Plate i &mdash; &ldquo;Survey, second attempt,&rdquo; ink on gesso board.</figcaption>
+    </figure>
+
+    <div class="feature-body" id="lead-body">
+      <p>The instrument arrived in a wooden case the colour of weak tea, and for three weeks it sat on the windowsill doing nothing at all. My uncle had promised me a coastline. What he had actually promised, in the letter that reached me two days after his death, was the means to measure one.</p>
+      <p>Coastlines are not lines. This is the first thing a surveyor learns and the last thing he believes. A line implies a decision &mdash; here, and not there &mdash; and the sea makes no such decision. It lends you a shoreline for an afternoon, bills you for the wear, and reclaims the debt by morning.</p>
+      <p>I measured anyway. I set the tripod in wet sand, levelled it against a horizon that would not hold still, and recorded a number that was already a lie by the time the pencil left the page.</p>
+    </div>
+
+    <aside class="feature-aside">
+      <blockquote class="pull">
+        <p id="lead-quote">&ldquo;Every map is a promise the sea has no intention of keeping.&rdquo;</p>
+        <cite id="lead-cite">&mdash; from the fourth notebook</cite>
+      </blockquote>
+
+      <div class="alsos" style="margin-top:1.6rem">
+        <h3>Also in this issue</h3>
+        <ol>
+          <li>
+            <p class="t">The Boneyard Letters</p>
+            <p class="m">Reportage &middot; p. 34</p>
+          </li>
+          <li>
+            <p class="t">A Short History of the Guest Towel</p>
+            <p class="m">Essay &middot; p. 58</p>
+          </li>
+          <li>
+            <p class="t">Three Poems after Bruegel</p>
+            <p class="m">Verse &middot; p. 71</p>
+          </li>
+          <li>
+            <p class="t">Notes from the Composition Room</p>
+            <p class="m">Editor's letter &middot; p. 5</p>
+          </li>
+        </ol>
+      </div>
+    </aside>
+  </article>
+
+  <section class="demo" aria-labelledby="demo-heading">
+    <div class="wrap">
+      <div>
+        <p class="demo-label" id="demo-heading">Demo &middot; lead story switcher</p>
+        <p class="note" id="demo-status" role="status" aria-live="polite">Showing story 1 of 3. This control rewrites the lead column from local data only &mdash; nothing is loaded or sent.</p>
+      </div>
+      <select id="demo-action" aria-label="Choose which sample story leads the issue">
+        <option value="0">1 &middot; The Salt Cartographer</option>
+        <option value="1">2 &middot; On Borrowed Furniture</option>
+        <option value="2">3 &middot; Vermillion, Then Quiet</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="components wrap" aria-label="Component specimens">
+    <div class="comp-col">
+      <h4>Article cards</h4>
+      <div class="card-stack">
+        <div class="card">
+          <p class="m">Departments</p>
+          <h5>The Boneyard Letters</h5>
+          <p>Six years of correspondence from a shuttered type foundry, read in full for the first time.</p>
+        </div>
+        <div class="card">
+          <p class="m">Books</p>
+          <h5>A Short History of the Guest Towel</h5>
+          <p>What the linen cupboard knows about hospitality, hierarchy, and the passing of the second guest.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-col">
+      <h4>Buttons &amp; links</h4>
+      <div class="card-stack" data-demo-scope>
+        <button class="btn" type="button" data-demo="no subscription is started and no payment is taken">Subscribe &mdash; annual</button>
+        <button class="btn ghost" type="button" data-demo="no order is placed">Order back issues</button>
+        <p class="form-msg" data-demo-msg role="status" aria-live="polite"></p>
+        <p style="margin:0;font-size:.95rem;color:var(--ink-soft)">
+          Read the <a href="#lead-headline">lead story</a>, or browse the <a href="#demo-heading">demo switcher</a> above.
+        </p>
+      </div>
+    </div>
+
+    <div class="comp-col">
+      <h4>Dispatch form</h4>
+      <form class="subscribe" id="subscribe" novalidate>
+        <label class="fl" for="sub-email">Email, for the quarterly dispatch</label>
+        <input id="sub-email" name="email" type="email" autocomplete="email" placeholder="reader@example.com">
+        <button class="btn ghost" type="submit">Send</button>
+        <p class="form-msg" id="sub-msg" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="colophon wrap">
+  <span>The Ivory Quill &middot; editorial specimen</span>
+  <span><a href="index.html">All styles</a></span>
+</footer>
+
+<script>
+(function(){
+  var stories = [
+    {
+      kicker:"Fiction",
+      headline:"The Salt Cartographer",
+      dek:"A surveyor maps a coastline that refuses to stay put.",
+      byline:"Nadia Erram \u00b7 4,200 words",
+      quote:"\u201cEvery map is a promise the sea has no intention of keeping.\u201d",
+      cite:"\u2014 from the fourth notebook",
+      body:[
+        "The instrument arrived in a wooden case the colour of weak tea, and for three weeks it sat on the windowsill doing nothing at all. My uncle had promised me a coastline. What he had actually promised, in the letter that reached me two days after his death, was the means to measure one.",
+        "Coastlines are not lines. This is the first thing a surveyor learns and the last thing he believes. A line implies a decision \u2014 here, and not there \u2014 and the sea makes no such decision. It lends you a shoreline for an afternoon, bills you for the wear, and reclaims the debt by morning.",
+        "I measured anyway. I set the tripod in wet sand, levelled it against a horizon that would not hold still, and recorded a number that was already a lie by the time the pencil left the page."
+      ]
+    },
+    {
+      kicker:"Essay",
+      headline:"On Borrowed Furniture",
+      dek:"Inheritance, thrift, and the moral weight of a dining chair.",
+      byline:"Peter Oyelaran \u00b7 3,100 words",
+      quote:"\u201cWe do not own our furniture so much as hold it in trust for the next room.\u201d",
+      cite:"\u2014 notes toward a second draft",
+      body:[
+        "The chair came to me with four previous owners and a wobble in the left rear leg. My grandmother had bought it secondhand in a year she refused to name, and every household since had tightened the same brass screw with whatever tool was nearest to hand.",
+        "Furniture is the slowest argument a family has. Nothing else survives long enough to be asked about taste, thrift, and obligation at once, and nothing else is asked to be sat upon while the argument proceeds.",
+        "I refinished it badly, in a rented courtyard, under a sky the colour of a laundered shirt, and decided that the wobble would stay."
+      ]
+    },
+    {
+      kicker:"Poem",
+      headline:"Vermillion, Then Quiet",
+      dek:"Fourteen short lines on the colour of an argument ending.",
+      byline:"Iris Kluge \u00b7 verse",
+      quote:"\u201cThe red goes first; the quiet takes its time.\u201d",
+      cite:"\u2014 eighth line, final stanza",
+      body:[
+        "There is a shade of red that arrives before the sentence does, and stays after the sentence has been forgiven. It colours the edge of the kitchen tile, the lip of an unmoved cup, the one chair nobody chooses.",
+        "We call it heat, but it is closer to weather: it moves through a room on its own schedule, and leaves the light changed. Afterwards, the quiet is not empty. It is a colour with the red taken out.",
+        "I have kept a swatch of it for years, folded in the back of a book, in case the argument ever needs to be resumed politely."
+      ]
+    }
+  ];
+
+  var sel = document.getElementById("demo-action");
+  var status = document.getElementById("demo-status");
+  var el = {
+    kicker:document.getElementById("lead-kicker"),
+    headline:document.getElementById("lead-headline"),
+    dek:document.getElementById("lead-dek"),
+    byline:document.getElementById("lead-byline"),
+    quote:document.getElementById("lead-quote"),
+    cite:document.getElementById("lead-cite"),
+    body:document.getElementById("lead-body")
+  };
+
+  function render(i){
+    var s = stories[i];
+    el.kicker.textContent = s.kicker;
+    el.headline.textContent = s.headline;
+    el.dek.textContent = s.dek;
+    el.byline.textContent = s.byline;
+    el.quote.textContent = s.quote;
+    el.cite.textContent = s.cite;
+    el.body.innerHTML = "";
+    s.body.forEach(function(text){
+      var p = document.createElement("p");
+      p.textContent = text;
+      el.body.appendChild(p);
+    });
+    status.textContent = "Showing story " + (i+1) + " of " + stories.length +
+      " \u2014 \u201c" + s.headline + "\u201d. Demo only: this rewrites the lead column from local data, nothing is loaded or sent.";
+  }
+
+  sel.addEventListener("change", function(){ render(Number(sel.value)); });
+
+  /* Specimen controls: every auxiliary button reports honestly into its group's live region. */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-demo]"), function(btn){
+    btn.addEventListener("click", function(){
+      var scope = btn.closest("[data-demo-scope]") || document;
+      var slot = scope.querySelector("[data-demo-msg]");
+      if(!slot){ return; }
+      slot.textContent = "Demo only \u2014 \u201c" + btn.textContent.trim() + "\u201d: " +
+        btn.getAttribute("data-demo") + ". This is a specimen control; nothing leaves this page.";
+    });
+  });
+
+  document.getElementById("subscribe").addEventListener("submit", function(e){
+    e.preventDefault();
+    var msg = document.getElementById("sub-msg");
+    var input = document.getElementById("sub-email");
+    msg.textContent = input.value.trim()
+      ? "Demo only \u2014 this specimen sends nothing; no address was stored."
+      : "Demo only \u2014 enter any address to see the message state.";
+  });
+})();
+</script>
+</body>
+</html>

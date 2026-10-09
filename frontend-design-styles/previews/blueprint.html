@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview — Blueprint · Drafting Studio Sheet Viewer</title>
+<style>
+  :root{
+    --canvas:#eee9dd;
+    --panel:#f8f6ef;
+    --ink:#1d3f6e;
+    --ink-2:#16345c;
+    --muted:#4b6588;
+    --markup:#9b3a22;
+    --faint:#7d8ba3;
+    --rule:rgba(29,63,110,.34);
+    --rule-soft:rgba(29,63,110,.16);
+    --sans:ui-sans-serif,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background-color:var(--canvas);
+    background-image:
+      linear-gradient(to right, rgba(29,63,110,.09) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(29,63,110,.09) 1px, transparent 1px);
+    background-size:12px 12px;
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{width:min(1280px,100% - 2.4rem);margin-inline:auto;}
+  a{color:var(--ink);text-underline-offset:.18em;}
+  :focus-visible{outline:2px solid var(--markup);outline-offset:2px;}
+  h1,h2,h3{margin:0;letter-spacing:-.01em;}
+  .sr-only{
+    position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);
+    white-space:nowrap;border:0;padding:0;margin:0;
+  }
+  .lbl{
+    font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+    margin:0 0 .6rem;
+  }
+  .num{font-variant-numeric:tabular-nums;letter-spacing:.06em;}
+  .status{font-size:.8rem;line-height:1.6;color:var(--muted);margin:0;max-width:44rem;}
+
+  /* ---------- bar ---------- */
+  .bar{border-bottom:1px solid var(--rule);background:var(--panel);}
+  .bar .wrap{
+    display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.8rem 1.2rem;
+    min-height:3rem;padding:.45rem 0;
+  }
+  .all-styles{
+    display:inline-flex;align-items:center;gap:.45rem;min-height:2.25rem;
+    font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;
+    border:1px solid var(--ink);padding:.4rem .7rem;color:var(--ink);background:var(--panel);
+  }
+  .all-styles:hover{background:var(--ink);color:var(--panel);}
+  .bar-meta{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+
+  /* ---------- title block ---------- */
+  .head{padding:1.6rem 0 0;}
+  .head h1{font-size:clamp(1.4rem,3.2vw,2rem);font-weight:600;margin:0 0 .5rem;}
+  .head p{margin:0 0 1.2rem;color:var(--muted);max-width:38rem;font-size:.95rem;}
+  .titleblock{
+    display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;
+    border:1px solid var(--ink);background:var(--panel);
+  }
+  .titleblock .cell{border-left:1px solid var(--rule);padding:.7rem .9rem;min-width:0;}
+  .titleblock .cell:first-child{border-left:0;}
+  .titleblock .k{display:block;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+  .titleblock .v{display:block;font-size:.86rem;margin-top:.15rem;overflow-wrap:anywhere;}
+
+  /* ---------- work area ---------- */
+  .work{
+    display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;
+    padding:1.6rem 0 2.4rem;align-items:start;
+  }
+  .stage{grid-column:1 / span 8;min-width:0;}
+  .side{grid-column:9 / span 4;min-width:0;}
+
+  .sheet-head{
+    display:flex;flex-wrap:wrap;align-items:baseline;gap:.5rem 1rem;
+    padding:0 0 .6rem;border-bottom:1px solid var(--rule);margin-bottom:.8rem;
+  }
+  .sheet-id{font-size:1.05rem;font-weight:600;letter-spacing:.04em;}
+  .sheet-name{font-size:.9rem;color:var(--muted);min-width:0;}
+  .sheet-note{margin-left:auto;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+
+  .frame{border:2px solid var(--ink);background:var(--panel);padding:8px;}
+  .sheet{border:1px solid var(--ink);background:var(--panel);}
+  .sheet.swap{animation:crossfade .18s ease both;}
+  @keyframes crossfade{from{opacity:.25;}to{opacity:1;}}
+  .dwg{display:block;width:100%;height:auto;}
+  .dwg text{font-family:var(--sans);}
+  .dwg .dtx{paint-order:stroke;stroke:#f8f6ef;stroke-width:3;stroke-linejoin:round;}
+  .dwg.dims-off .dims{display:none;}
+  .dwg.lod-200 .hatch,.dwg.lod-200 .furn{display:none;}
+
+  .stage-foot{
+    display:flex;flex-wrap:wrap;gap:.8rem 1.4rem;align-items:center;
+    padding:.9rem 0 0;border-top:1px solid var(--rule);margin-top:.8rem;
+  }
+  .scalebar-wrap{position:relative;padding-bottom:1.35rem;}
+  .scalebar{display:flex;height:14px;width:220px;max-width:60vw;border:1px solid var(--ink);}
+  .scalebar .seg{flex:1 1 auto;position:relative;border-left:1px solid var(--ink);}
+  .scalebar .seg:first-child{border-left:0;}
+  .scalebar .seg.alt{background:var(--ink);}
+  .scalebar .tick{
+    position:absolute;top:16px;left:0;font-size:.72rem;color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .scalebar .tick.end{left:auto;right:0;transform:none;}
+  .scalebar-cap{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .stage-foot .dirn{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+
+  /* ---------- sidebar ---------- */
+  .side{
+    border:1px solid var(--ink);background:var(--panel);padding:1rem 1.1rem 1.2rem;
+  }
+  .side-title{font-size:1.02rem;font-weight:600;margin:0 0 .4rem;}
+  .side-note{font-size:.86rem;color:var(--muted);margin:0 0 1.2rem;}
+  .side-sub{
+    font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+    margin:1.4rem 0 .5rem;padding-bottom:.35rem;border-bottom:2px solid var(--ink);
+  }
+  .side-sub:first-of-type{margin-top:0;}
+  .facts{margin:0;}
+  .facts > div{display:flex;gap:1rem;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid var(--rule-soft);}
+  .facts dt{font-size:.76rem;color:var(--muted);min-width:0;}
+  .facts dd{margin:0;font-size:.8rem;text-align:right;font-variant-numeric:tabular-nums;flex:none;}
+
+  .tbl{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-numeric:tabular-nums;}
+  .tbl th{
+    text-align:left;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    font-weight:500;padding:.35rem 0;border-bottom:1px solid var(--rule);
+  }
+  .tbl td{padding:.45rem .5rem .45rem 0;border-bottom:1px solid var(--rule-soft);vertical-align:top;}
+  .tbl td:first-child{padding-left:0;}
+  .tbl .r{text-align:right;padding-right:0;}
+  .revs tr[aria-current="true"] td{background:rgba(155,58,34,.06);}
+  .revs tr[aria-current="true"] td:first-child{box-shadow:inset 2px 0 0 var(--markup);padding-left:.5rem;}
+
+  .notes{margin:0;padding:0;list-style:none;}
+  .notes li{
+    font-size:.82rem;line-height:1.55;color:var(--muted);
+    padding:.5rem 0 .5rem .8rem;border-bottom:1px solid var(--rule-soft);
+    border-left:1px solid var(--rule);overflow-wrap:anywhere;
+  }
+
+  /* ---------- demo band ---------- */
+  .demo{background:var(--panel);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:1.8rem 0 2rem;}
+  .demo-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px 24px;align-items:start;}
+  .demo-head{grid-column:1 / span 5;min-width:0;}
+  .demo-body{grid-column:6 / span 7;min-width:0;}
+  .demo-controls{display:flex;flex-wrap:wrap;gap:1rem 1.4rem;align-items:flex-end;}
+  .field{display:flex;flex-direction:column;gap:.35rem;min-width:0;}
+  .field .flab{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .check{
+    display:inline-flex;align-items:center;gap:.5rem;min-height:2.5rem;font-size:.78rem;color:var(--ink);
+  }
+  .check input{width:1.05rem;height:1.05rem;accent-color:var(--ink);}
+  select,input[type="text"],input[type="email"]{
+    font-family:var(--sans);font-size:.84rem;color:var(--ink);background:var(--panel);
+    border:1px solid var(--ink);border-radius:0;padding:.5rem .6rem;min-height:2.5rem;min-width:0;
+  }
+  select:focus-visible,input:focus-visible{outline:2px solid var(--markup);outline-offset:1px;}
+  input::placeholder{color:var(--muted);opacity:1;}
+  [aria-invalid="true"]{border:2px solid var(--markup);}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    font-family:var(--sans);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;
+    background:transparent;color:var(--ink);border:2px solid var(--ink);border-radius:0;
+    padding:.6rem 1rem;min-height:2.5rem;cursor:pointer;
+    transition:background-color .12s linear,color .12s linear,border-color .12s linear;
+  }
+  .btn:hover{background:rgba(29,63,110,.08);}
+  .btn.primary{background:var(--ink);color:var(--panel);}
+  .btn.primary:hover{background:var(--ink-2);border-color:var(--ink-2);}
+  .btn.ghost{border:0;border-bottom:1px solid var(--ink);padding:.5rem 0;background:transparent;}
+  .btn.ghost:hover{color:var(--ink-2);}
+  .btn:disabled{background:transparent;border:1px dashed var(--faint);color:var(--muted);cursor:not-allowed;}
+  .tag{
+    display:inline-flex;align-items:center;gap:.4rem;
+    font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);
+    border:1px solid var(--rule);padding:.35rem .55rem;background:var(--panel);
+  }
+  .tag.live{border-color:var(--markup);color:var(--markup);}
+
+  /* ---------- components ---------- */
+  .components{
+    display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:28px 24px;
+    padding:2.2rem 0 2.6rem;
+  }
+  .comp{min-width:0;}
+  .comp:nth-child(1){grid-column:1 / span 4;}
+  .comp:nth-child(2){grid-column:5 / span 4;}
+  .comp:nth-child(3){grid-column:9 / span 4;}
+  .comp h3{
+    font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+    margin:0 0 .8rem;padding-bottom:.35rem;border-bottom:1px solid var(--rule);
+  }
+  .stack{display:grid;gap:.7rem;justify-items:start;}
+  .row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;}
+  .callout{
+    border:1px solid var(--markup);background:var(--panel);padding:.8rem .9rem;
+  }
+  .callout .k{
+    display:block;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--markup);
+    margin-bottom:.3rem;
+  }
+  .callout p{margin:0;font-size:.85rem;color:var(--muted);}
+  .mini-block{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink);background:var(--panel);}
+  .mini-block .cell{border-left:1px solid var(--rule);border-top:1px solid var(--rule);padding:.5rem .6rem;min-width:0;}
+  .mini-block .cell:nth-child(1),.mini-block .cell:nth-child(2){border-top:0;}
+  .mini-block .cell:nth-child(odd){border-left:0;}
+  .mini-block .k{display:block;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .mini-block .v{display:block;font-size:.8rem;margin-top:.1rem;}
+  .form{display:grid;gap:.6rem;justify-items:start;width:100%;}
+  .form .field{width:100%;}
+  .form input{width:100%;}
+
+  /* ---------- footer ---------- */
+  .site{background:var(--panel);border-top:1px solid var(--rule);}
+  .site .wrap{
+    display:flex;flex-wrap:wrap;justify-content:space-between;gap:.6rem 1.2rem;
+    padding:1.4rem 0;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1024px){
+    .stage,.side{grid-column:1 / -1;}
+    .titleblock{grid-template-columns:1fr 1fr;}
+    .titleblock .cell{border-top:1px solid var(--rule);}
+    .titleblock .cell:nth-child(1),.titleblock .cell:nth-child(2){border-top:0;}
+    .titleblock .cell:nth-child(3){border-left:0;}
+  }
+  @media (max-width:900px){
+    .demo-head,.demo-body{grid-column:1 / -1;}
+    .components{grid-template-columns:minmax(0,1fr);}
+    .comp:nth-child(1),.comp:nth-child(2),.comp:nth-child(3){grid-column:1 / -1;}
+    .frame{padding:6px;}
+    .side{padding:.9rem 1rem 1rem;}
+  }
+  @media (max-width:700px){
+    .scalebar{width:180px;max-width:none;}
+  }
+  @media (max-width:560px){
+    body{font-size:15px;}
+    .head h1{font-size:1.3rem;}
+    .revs thead{display:none;}
+    .revs tr{display:block;padding:.5rem 0;border-bottom:1px solid var(--rule-soft);}
+    .revs td{display:flex;gap:1rem;justify-content:space-between;border:0;padding:.1rem 0;}
+    .revs td::before{content:attr(data-label);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+    .revs tr[aria-current="true"] td{background:transparent;}
+    .revs tr[aria-current="true"] td:first-child{box-shadow:none;padding-left:0;color:var(--markup);}
+    .btn{width:100%;}
+    .demo-controls{display:grid;gap:.8rem;}
+    .check,.field{width:100%;}
+    select{width:100%;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="all-styles" href="index.html">&larr; All styles</a>
+    <span class="bar-meta">Sheet set &middot; Bellwether Row, Block C &middot; Issue 3 &middot; Rev C</span>
+  </div>
+</header>
+
+<main>
+  <section class="head wrap" aria-labelledby="page-title">
+    <h1 id="page-title">Measured survey &mdash; Bellwether Row, Block C</h1>
+    <p>Second site visit, drawn from the yard datum. Walls verified at three positions; the yard
+      opening and the retained stack are set out below.</p>
+
+    <div class="titleblock">
+      <div class="cell"><span class="k">Project</span><span class="v">Bellwether Row, Block C</span></div>
+      <div class="cell"><span class="k">Sheet</span><span class="v num" id="block-sheet">A-101</span></div>
+      <div class="cell"><span class="k">Scale</span><span class="v num" id="block-scale">1:50</span></div>
+      <div class="cell"><span class="k">Rev</span><span class="v num">C</span></div>
+    </div>
+  </section>
+
+  <section class="work wrap" aria-label="Drawing sheet and project record">
+    <div class="stage">
+      <div class="sheet-head">
+        <span class="sheet-id num" id="sheet-id">A-101</span>
+        <span class="sheet-name" id="sheet-name">Ground-floor plan</span>
+        <span class="sheet-note">Drawing sheet</span>
+      </div>
+
+      <div class="frame">
+        <div class="sheet" id="drawing">
+          <svg class="dwg" viewBox="0 0 660 480" role="img" aria-label="Ground-floor plan at 1:50: three internal rooms inside 340 millimetre walls, two windows, and a double door onto the yard.">
+            <defs>
+              <pattern id="hatchPlan" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <line x1="0" y1="0" x2="0" y2="7" stroke="rgba(29,63,110,.34)" stroke-width="2.2"/>
+              </pattern>
+            </defs>
+
+            <g fill="none" stroke="#7d8ba3" stroke-width="1">
+              <path d="M26 44 h14 M33 37 v14 M620 44 h14 M627 37 v14 M26 436 h14 M33 429 v14 M620 436 h14 M627 429 v14"/>
+            </g>
+
+            <g fill="none" stroke="#7d8ba3" stroke-width="1" stroke-dasharray="7 3 1 3">
+              <path d="M56 240 H520"/>
+              <path d="M300 70 V412"/>
+            </g>
+
+            <g class="hatch" fill="url(#hatchPlan)">
+              <rect x="80" y="90" width="440" height="16"/>
+              <rect x="80" y="374" width="212" height="16"/>
+              <rect x="372" y="374" width="148" height="16"/>
+              <rect x="80" y="90" width="16" height="300"/>
+              <rect x="504" y="90" width="16" height="300"/>
+              <rect x="272" y="106" width="12" height="146"/>
+              <rect x="96" y="240" width="188" height="12"/>
+            </g>
+
+            <g fill="none" stroke="#1d3f6e" stroke-width="1.6">
+              <rect x="80" y="90" width="440" height="16"/>
+              <rect x="80" y="374" width="212" height="16"/>
+              <rect x="372" y="374" width="148" height="16"/>
+              <rect x="80" y="90" width="16" height="300"/>
+              <rect x="504" y="90" width="16" height="300"/>
+              <rect x="272" y="106" width="12" height="146" stroke-width="1.2"/>
+              <rect x="96" y="240" width="188" height="12" stroke-width="1.2"/>
+            </g>
+
+            <g fill="#f8f6ef" stroke="#1d3f6e" stroke-width="1.6">
+              <rect x="504" y="176" width="16" height="88"/>
+              <rect x="300" y="90" width="80" height="16"/>
+            </g>
+            <g fill="none" stroke="#1d3f6e" stroke-width="1">
+              <path d="M512 176 v88"/>
+              <path d="M300 98 h80"/>
+            </g>
+
+            <g fill="none" stroke="#1d3f6e" stroke-width="1">
+              <path d="M292 374 v-40 a40 40 0 0 1 40 40"/>
+              <path d="M372 374 v-40 a40 40 0 0 0 -40 40"/>
+            </g>
+
+            <g class="furn" fill="none" stroke="#7d8ba3" stroke-width="1" stroke-dasharray="6 4">
+              <rect x="108" y="120" width="120" height="48"/>
+              <rect x="108" y="266" width="54" height="84"/>
+              <rect x="306" y="120" width="80" height="44"/>
+              <rect x="306" y="240" width="140" height="38"/>
+              <circle cx="460" cy="330" r="26"/>
+            </g>
+
+            <g fill="#1d3f6e">
+              <text x="190" y="200" font-size="14" text-anchor="middle" letter-spacing="1.4">STUDIO</text>
+              <text x="190" y="218" font-size="11" text-anchor="middle" fill="#4b6588" letter-spacing="1">22.4 m&#178;</text>
+              <text x="190" y="316" font-size="14" text-anchor="middle" letter-spacing="1.4">STORE</text>
+              <text x="190" y="334" font-size="11" text-anchor="middle" fill="#4b6588" letter-spacing="1">9.8 m&#178;</text>
+              <text x="394" y="190" font-size="14" text-anchor="middle" letter-spacing="1.4">LIVING</text>
+              <text x="394" y="208" font-size="11" text-anchor="middle" fill="#4b6588" letter-spacing="1">42.0 m&#178;</text>
+            </g>
+
+            <g class="dims" fill="none" stroke="#1d3f6e" stroke-width="1">
+              <path d="M80 390 V442 M250 390 V422 M520 390 V442 M56 90 V390"/>
+              <path d="M52 90 H80 M52 390 H80"/>
+              <path d="M80 406 H250 M250 406 H520"/>
+              <path d="M76 402 l8 8 M246 402 l8 8 M516 402 l8 8"/>
+              <path d="M80 430 H520"/>
+              <path d="M76 426 l8 8 M516 426 l8 8"/>
+              <path d="M52 86 l8 8 M52 386 l8 8"/>
+            </g>
+
+            <g class="dtx num" fill="#1d3f6e" font-size="12" text-anchor="middle">
+              <text x="165" y="400">5 400</text>
+              <text x="385" y="400">7 200</text>
+              <text x="300" y="424">12 600</text>
+              <text x="44" y="240" transform="rotate(-90 44 240)">8 400</text>
+            </g>
+
+            <g fill="none" stroke="#1d3f6e" stroke-width="1">
+              <circle cx="586" cy="418" r="16"/>
+              <path d="M586 406 L592 424 L586 420 L580 424 Z" fill="#1d3f6e"/>
+            </g>
+            <text x="586" y="452" fill="#1d3f6e" font-size="12" text-anchor="middle" letter-spacing="1.2">N</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="stage-foot">
+        <div class="scalebar-wrap">
+          <div class="scalebar" id="scalebar" aria-hidden="true"></div>
+          <span class="scalebar-cap" id="scalebar-cap">metres &middot; plotted at 1:50</span>
+        </div>
+        <span class="dirn">North to sheet top &middot; all dimensions in millimetres</span>
+      </div>
+    </div>
+
+    <aside class="side" aria-labelledby="side-title">
+      <h2 class="side-title" id="side-title">Record &amp; revisions</h2>
+      <p class="side-note">Every figure on the sheet is repeated here as text, so the drawing is never
+        the only source of a measurement.</p>
+
+      <h3 class="side-sub">Facts</h3>
+      <dl class="facts" id="facts">
+        <div><dt>Gross internal area</dt><dd>148.5 m&#178;</dd></div>
+        <div><dt>Footprint</dt><dd>12.60 &times; 8.40 m</dd></div>
+        <div><dt>Bay spacing</dt><dd>3.15 m</dd></div>
+        <div><dt>Clear ceiling</dt><dd>2.74 m</dd></div>
+      </dl>
+
+      <h3 class="side-sub">Dimensions</h3>
+      <table class="tbl">
+        <caption class="sr-only">Dimension summary for the current sheet</caption>
+        <thead>
+          <tr><th scope="col">Item</th><th scope="col" class="r">Value</th></tr>
+        </thead>
+        <tbody id="dims-body">
+          <tr><td>Overall width</td><td class="r">12 600</td></tr>
+          <tr><td>Overall depth</td><td class="r">8 400</td></tr>
+          <tr><td>Bay 1</td><td class="r">5 400</td></tr>
+          <tr><td>Bay 2</td><td class="r">7 200</td></tr>
+          <tr><td>Wall thickness</td><td class="r">340</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="side-sub">Revisions</h3>
+      <table class="tbl revs">
+        <caption class="sr-only">Revision history, current revision marked</caption>
+        <thead>
+          <tr><th scope="col">Rev</th><th scope="col">Date</th><th scope="col">Description</th><th scope="col">By</th></tr>
+        </thead>
+        <tbody>
+          <tr aria-current="true">
+            <td data-label="Rev">C</td><td data-label="Date">2026-09-18</td>
+            <td data-label="Description">Yard opening set out</td><td data-label="By">R. M.</td>
+          </tr>
+          <tr>
+            <td data-label="Rev">B</td><td data-label="Date">2026-08-02</td>
+            <td data-label="Description">Wall thickness verified on site</td><td data-label="By">R. M.</td>
+          </tr>
+          <tr>
+            <td data-label="Rev">A</td><td data-label="Date">2026-07-14</td>
+            <td data-label="Description">Measured survey issued</td><td data-label="By">H. O.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="side-sub">Notes</h3>
+      <ul class="notes" id="notes">
+        <li>Existing masonry retained throughout; new openings are set out dashed.</li>
+        <li>Wall thickness verified on site at three positions.</li>
+        <li>Yard door approved at 900 mm clear.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="demo" aria-labelledby="demo-title">
+    <div class="wrap demo-grid">
+      <div class="demo-head">
+        <p class="lbl">Demo &middot; sheet viewer</p>
+        <h2 id="demo-title" style="font-size:1.05rem;font-weight:600;margin:0 0 .6rem">View and plot controls</h2>
+        <p class="status" id="demo-status" role="status" aria-live="polite">Sheet A-101 &mdash; Ground-floor
+          plan, 1:50. Demo only: this swaps the drawing, the sheet number and the record from data held in
+          this page. Nothing is exported, printed or sent.</p>
+      </div>
+
+      <div class="demo-body">
+        <div class="demo-controls">
+          <button class="btn primary" type="button" id="demo-action">Switch to elevation</button>
+          <label class="check" for="dim-toggle"><input type="checkbox" id="dim-toggle" checked> Dimension lines</label>
+          <span class="field">
+            <label class="flab" for="scale-select">Plot scale</label>
+            <select id="scale-select">
+              <option value="1:50" selected>1:50</option>
+              <option value="1:100">1:100</option>
+              <option value="1:200">1:200</option>
+            </select>
+          </span>
+          <button class="btn" type="button" disabled title="Not available in this specimen">Export DWG &mdash; unavailable</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="components wrap" aria-label="Component specimens">
+    <div class="comp" data-demo-scope>
+      <h3>Buttons &amp; sheet tags</h3>
+      <div class="stack">
+        <button class="btn primary" type="button" data-demo="no drawing is issued">Issue for construction</button>
+        <button class="btn" type="button" data-demo="nothing is printed">Print sheet A-101</button>
+        <button class="btn ghost" type="button" data-demo="no enquiry is sent">Ask the surveyor</button>
+        <button class="btn" type="button" disabled>Export DWG &mdash; unavailable in this specimen</button>
+        <div class="row">
+          <span class="tag">A-101 plan</span>
+          <span class="tag">A-201 elevation</span>
+          <span class="tag live">Rev C current</span>
+        </div>
+        <p class="status" data-demo-msg role="status" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="comp">
+      <h3>Client reference form</h3>
+      <form class="form" id="ref-form" novalidate>
+        <span class="field">
+          <label class="flab" for="ref-input">Client reference</label>
+          <input id="ref-input" name="reference" type="text" autocomplete="off" placeholder="BW-C-0000">
+        </span>
+        <button class="btn" type="submit">Attach to sheet</button>
+        <p class="status" id="ref-msg" role="status" aria-live="polite">Demo form &mdash; nothing is sent.
+          Submitting empty shows the validation state; any value shows the accepted state.</p>
+      </form>
+    </div>
+
+    <div class="comp">
+      <h3>Title block &amp; markup</h3>
+      <div class="mini-block">
+        <div class="cell"><span class="k">Sheet</span><span class="v num">A-101</span></div>
+        <div class="cell"><span class="k">Scale</span><span class="v num">1:50</span></div>
+        <div class="cell"><span class="k">Date</span><span class="v num">2026-09-18</span></div>
+        <div class="cell"><span class="k">Rev</span><span class="v num">C</span></div>
+      </div>
+      <div class="callout" style="margin-top:1rem">
+        <span class="k">Rev C &middot; markup</span>
+        <p>Yard opening widened to 900 mm clear; dimension 3 150 amended on the plan sheet and carried
+          through to the elevation.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>Bellwether Row &middot; blueprint specimen</span>
+    <span><a href="index.html">All styles</a></span>
+  </div>
+</footer>
+
+<template id="dwg-plan">
+  <svg class="dwg" viewBox="0 0 660 480" role="img" aria-label="Ground-floor plan at 1:50: three internal rooms inside 340 millimetre walls, two windows, and a double door onto the yard.">
+    <defs>
+      <pattern id="hatchPlanB" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="7" stroke="rgba(29,63,110,.34)" stroke-width="2.2"/>
+      </pattern>
+    </defs>
+
+    <g fill="none" stroke="#7d8ba3" stroke-width="1">
+      <path d="M26 44 h14 M33 37 v14 M620 44 h14 M627 37 v14 M26 436 h14 M33 429 v14 M620 436 h14 M627 429 v14"/>
+    </g>
+
+    <g fill="none" stroke="#7d8ba3" stroke-width="1" stroke-dasharray="7 3 1 3">
+      <path d="M56 240 H520"/>
+      <path d="M300 70 V412"/>
+    </g>
+
+    <g class="hatch" fill="url(#hatchPlanB)">
+      <rect x="80" y="90" width="440" height="16"/>
+      <rect x="80" y="374" width="212" height="16"/>
+      <rect x="372" y="374" width="148" height="16"/>
+      <rect x="80" y="90" width="16" height="300"/>
+      <rect x="504" y="90" width="16" height="300"/>
+      <rect x="272" y="106" width="12" height="146"/>
+      <rect x="96" y="240" width="188" height="12"/>
+    </g>
+
+    <g fill="none" stroke="#1d3f6e" stroke-width="1.6">
+      <rect x="80" y="90" width="440" height="16"/>
+      <rect x="80" y="374" width="212" height="16"/>
+      <rect x="372" y="374" width="148" height="16"/>
+      <rect x="80" y="90" width="16" height="300"/>
+      <rect x="504" y="90" width="16" height="300"/>
+      <rect x="272" y="106" width="12" height="146" stroke-width="1.2"/>
+      <rect x="96" y="240" width="188" height="12" stroke-width="1.2"/>
+    </g>
+
+    <g fill="#f8f6ef" stroke="#1d3f6e" stroke-width="1.6">
+      <rect x="504" y="176" width="16" height="88"/>
+      <rect x="300" y="90" width="80" height="16"/>
+    </g>
+    <g fill="none" stroke="#1d3f6e" stroke-width="1">
+      <path d="M512 176 v88"/>
+      <path d="M300 98 h80"/>
+    </g>
+
+    <g fill="none" stroke="#1d3f6e" stroke-width="1">
+      <path d="M292 374 v-40 a40 40 0 0 1 40 40"/>
+      <path d="M372 374 v-40 a40 40 0 0 0 -40 40"/>
+    </g>
+
+    <g class="furn" fill="none" stroke="#7d8ba3" stroke-width="1" stroke-dasharray="6 4">
+      <rect x="108" y="120" width="120" height="48"/>
+      <rect x="108" y="266" width="54" height="84"/>
+      <rect x="306" y="120" width="80" height="44"/>
+      <rect x="306" y="240" width="140" height="38"/>
+      <circle cx="460" cy="330" r="26"/>
+    </g>
+
+    <g fill="#1d3f6e">
+      <text x="190" y="200" font-size="14" text-anchor="middle" letter-spacing="1.4">STUDIO</text>
+      <text x="190" y="218" font-size="11" text-anchor="middle" fill="#4b6588" letter-spacing="1">22.4 m&#178;</text>
+      <text x="190" y="316" font-size="14" text-anchor="middle" letter-spacing="1.4">STORE</text>
+      <text x="190" y="334" font-size="11" text-anchor="middle" fill="#4b6588" letter-spacing="1">9.8 m&#178;</text>
+      <text x="394" y="190" font-size="14" text-anchor="middle" letter-spacing="1.4">LIVING</text>
+      <text x="394" y="208" font-size="11" text-anchor="middle" fill="#4b6588" letter-spacing="1">42.0 m&#178;</text>
+    </g>
+
+    <g class="dims" fill="none" stroke="#1d3f6e" stroke-width="1">
+      <path d="M80 390 V442 M250 390 V422 M520 390 V442 M56 90 V390"/>
+      <path d="M52 90 H80 M52 390 H80"/>
+      <path d="M80 406 H250 M250 406 H520"/>
+      <path d="M76 402 l8 8 M246 402 l8 8 M516 402 l8 8"/>
+      <path d="M80 430 H520"/>
+      <path d="M76 426 l8 8 M516 426 l8 8"/>
+      <path d="M52 86 l8 8 M52 386 l8 8"/>
+    </g>
+
+    <g class="dtx num" fill="#1d3f6e" font-size="12" text-anchor="middle">
+      <text x="165" y="400">5 400</text>
+      <text x="385" y="400">7 200</text>
+      <text x="300" y="424">12 600</text>
+      <text x="44" y="240" transform="rotate(-90 44 240)">8 400</text>
+    </g>
+
+    <g fill="none" stroke="#1d3f6e" stroke-width="1">
+      <circle cx="586" cy="418" r="16"/>
+      <path d="M586 406 L592 424 L586 420 L580 424 Z" fill="#1d3f6e"/>
+    </g>
+    <text x="586" y="452" fill="#1d3f6e" font-size="12" text-anchor="middle" letter-spacing="1.2">N</text>
+  </svg>
+</template>
+
+<template id="dwg-elev">
+  <svg class="dwg" viewBox="0 0 660 480" role="img" aria-label="West elevation at 1:100: gabled front twelve point six metres wide with three windows, a stone plinth, a retained stack and level dimensions.">
+    <defs>
+      <pattern id="hatchElevB" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="7" stroke="rgba(29,63,110,.34)" stroke-width="2.2"/>
+      </pattern>
+    </defs>
+
+    <g fill="none" stroke="#7d8ba3" stroke-width="1">
+      <path d="M26 44 h14 M33 37 v14 M620 44 h14 M627 37 v14 M26 436 h14 M33 429 v14 M620 436 h14 M627 429 v14"/>
+    </g>
+
+    <g fill="none" stroke="#7d8ba3" stroke-width="1">
+      <path d="M62 392 l16 14 M92 392 l16 14 M122 392 l16 14 M152 392 l16 14 M182 392 l16 14 M212 392 l16 14
+               M242 392 l16 14 M272 392 l16 14 M302 392 l16 14 M332 392 l16 14 M362 392 l16 14 M392 392 l16 14
+               M422 392 l16 14 M452 392 l16 14 M482 392 l16 14"/>
+    </g>
+
+    <g fill="none" stroke="#7d8ba3" stroke-width="1" stroke-dasharray="7 3 1 3">
+      <path d="M352 108 H604"/>
+      <path d="M528 204 H604"/>
+    </g>
+    <path d="M60 390 H600" fill="none" stroke="#1d3f6e" stroke-width="2.4"/>
+
+    <path d="M132 204 L330 108 L528 204" fill="none" stroke="#1d3f6e" stroke-width="2.4"/>
+
+    <rect x="428" y="78" width="30" height="92" fill="#f8f6ef" stroke="#1d3f6e" stroke-width="1.6"/>
+    <rect x="422" y="78" width="42" height="10" fill="#f8f6ef" stroke="#1d3f6e" stroke-width="1.6"/>
+
+    <g class="hatch" fill="url(#hatchElevB)">
+      <rect x="130" y="362" width="400" height="28"/>
+    </g>
+    <g fill="none" stroke="#1d3f6e">
+      <rect x="150" y="200" width="360" height="162" stroke-width="2.4"/>
+      <rect x="130" y="362" width="400" height="28" stroke-width="1.6"/>
+    </g>
+
+    <g fill="none" stroke="#1d3f6e" stroke-width="1.6">
+      <rect x="180" y="236" width="64" height="84"/>
+      <rect x="272" y="236" width="64" height="84"/>
+      <rect x="364" y="236" width="64" height="84"/>
+      <path d="M174 320 h76 M266 320 h76 M358 320 h76"/>
+      <rect x="440" y="290" width="52" height="72"/>
+      <path d="M428 362 h68"/>
+    </g>
+    <g fill="none" stroke="#1d3f6e" stroke-width="1">
+      <path d="M212 236 V320 M180 278 H244"/>
+      <path d="M304 236 V320 M272 278 H336"/>
+      <path d="M396 236 V320 M364 278 H428"/>
+      <path d="M466 290 V362 M440 326 H492"/>
+    </g>
+
+    <g class="dims" fill="none" stroke="#1d3f6e" stroke-width="1">
+      <path d="M596 108 V204"/>
+      <path d="M592 104 l8 8 M592 200 l8 8"/>
+      <path d="M130 390 V442 M530 390 V442"/>
+      <path d="M130 436 H530"/>
+      <path d="M126 432 l8 8 M526 432 l8 8"/>
+    </g>
+
+    <g fill="#9b3a22">
+      <path d="M600 102 h8 l-4 8 z"/>
+      <path d="M600 198 h8 l-4 8 z"/>
+      <path d="M600 384 h8 l-4 8 z"/>
+    </g>
+
+    <g class="dtx num" fill="#1d3f6e" font-size="12" text-anchor="end">
+      <text x="588" y="104">RIDGE +8.150</text>
+      <text x="588" y="200">EAVES +6.400</text>
+    </g>
+    <text class="dtx num" x="592" y="382" fill="#9b3a22" font-size="12" text-anchor="end">&#177;0.000</text>
+    <text class="dtx num" x="330" y="430" fill="#1d3f6e" font-size="12" text-anchor="middle">12 600</text>
+
+    <g fill="none" stroke="#1d3f6e" stroke-width="1">
+      <path d="M459 118 L500 88"/>
+      <path d="M470 378 L516 402"/>
+    </g>
+    <g fill="#1d3f6e">
+      <circle cx="459" cy="118" r="2.2"/>
+      <circle cx="470" cy="378" r="2.2"/>
+    </g>
+    <g class="dtx" fill="#1d3f6e" font-size="11">
+      <text x="506" y="86">STACK, RETAINED</text>
+      <text x="522" y="406">PLINTH, EXISTING</text>
+    </g>
+  </svg>
+</template>
+
+<template id="dwg-plan-sm">
+  <svg class="dwg" viewBox="0 0 380 320" role="img" aria-label="Ground-floor plan, reduced-scale general arrangement: three rooms inside the external walls, two windows and a double door onto the yard, with overall width and depth dimensions.">
+    <defs>
+      <pattern id="hatchPlanS" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(29,63,110,.34)" stroke-width="2"/>
+      </pattern>
+    </defs>
+
+    <g fill="none" stroke="#7d8ba3" stroke-width="1">
+      <path d="M8 14 h10 M13 9 v10 M362 14 h10 M367 9 v10"/>
+    </g>
+
+    <g class="hatch" fill="url(#hatchPlanS)">
+      <rect x="40" y="36" width="290" height="232"/>
+    </g>
+    <rect x="50" y="46" width="270" height="212" fill="#f8f6ef"/>
+    <g class="hatch" fill="url(#hatchPlanS)">
+      <rect x="180" y="46" width="8" height="132"/>
+      <rect x="50" y="170" width="138" height="8"/>
+    </g>
+    <rect x="170" y="258" width="80" height="10" fill="#f8f6ef"/>
+
+    <g fill="none" stroke="#1d3f6e" stroke-width="1.6">
+      <rect x="40" y="36" width="290" height="232"/>
+      <rect x="50" y="46" width="270" height="212"/>
+      <rect x="180" y="46" width="8" height="132" stroke-width="1.2"/>
+      <rect x="50" y="170" width="138" height="8" stroke-width="1.2"/>
+      <path d="M170 258 v10 M250 258 v10"/>
+    </g>
+
+    <g fill="#f8f6ef" stroke="#1d3f6e" stroke-width="1.6">
+      <rect x="320" y="120" width="10" height="60"/>
+      <rect x="210" y="36" width="60" height="10"/>
+    </g>
+    <g fill="none" stroke="#1d3f6e" stroke-width="1">
+      <path d="M325 120 v60"/>
+      <path d="M210 41 h60"/>
+      <path d="M170 258 v-32 a32 32 0 0 1 32 32"/>
+      <path d="M250 258 v-32 a32 32 0 0 0 -32 32"/>
+    </g>
+
+    <g class="furn" fill="none" stroke="#7d8ba3" stroke-width="1" stroke-dasharray="5 3">
+      <rect x="60" y="62" width="84" height="32"/>
+      <rect x="60" y="190" width="32" height="56"/>
+      <rect x="210" y="90" width="64" height="32"/>
+      <rect x="210" y="176" width="100" height="28"/>
+      <circle cx="288" cy="228" r="18"/>
+    </g>
+
+    <g fill="#1d3f6e">
+      <text x="120" y="116" font-size="14" text-anchor="middle" letter-spacing="1.2">STUDIO</text>
+      <text x="120" y="132" font-size="13" text-anchor="middle" fill="#4b6588" letter-spacing=".8">22.4 m&#178;</text>
+      <text x="120" y="220" font-size="14" text-anchor="middle" letter-spacing="1.2">STORE</text>
+      <text x="120" y="236" font-size="13" text-anchor="middle" fill="#4b6588" letter-spacing=".8">9.8 m&#178;</text>
+      <text x="252" y="140" font-size="14" text-anchor="middle" letter-spacing="1.2">LIVING</text>
+      <text x="252" y="156" font-size="13" text-anchor="middle" fill="#4b6588" letter-spacing=".8">42.0 m&#178;</text>
+    </g>
+
+    <g class="dims" fill="none" stroke="#1d3f6e" stroke-width="1">
+      <path d="M40 268 V300 M330 268 V300 M20 36 V268"/>
+      <path d="M20 36 H40 M20 268 H40"/>
+      <path d="M40 290 H330"/>
+      <path d="M36 286 l8 8 M326 286 l8 8"/>
+      <path d="M16 32 l8 8 M16 264 l8 8"/>
+    </g>
+    <g class="dtx num" fill="#1d3f6e" font-size="14" text-anchor="middle">
+      <text x="185" y="284">12 600</text>
+      <text x="15" y="152" transform="rotate(-90 15 152)">8 400</text>
+    </g>
+
+    <g fill="none" stroke="#1d3f6e" stroke-width="1">
+      <circle cx="348" cy="288" r="13"/>
+      <path d="M348 278 L353 293 L348 290 L343 293 Z" fill="#1d3f6e"/>
+    </g>
+    <text x="348" y="314" fill="#1d3f6e" font-size="13" text-anchor="middle" letter-spacing="1">N</text>
+  </svg>
+</template>
+
+<template id="dwg-elev-sm">
+  <svg class="dwg" viewBox="0 0 380 320" role="img" aria-label="West elevation, reduced-scale general arrangement: gabled front with two windows, a door, a stone plinth, a retained stack, and levels for ridge, eaves and datum.">
+    <defs>
+      <pattern id="hatchElevS" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(29,63,110,.34)" stroke-width="2"/>
+      </pattern>
+    </defs>
+
+    <g fill="none" stroke="#7d8ba3" stroke-width="1">
+      <path d="M8 14 h10 M13 9 v10 M362 14 h10 M367 9 v10"/>
+      <path d="M28 264 l12 10 M52 264 l12 10 M76 264 l12 10 M100 264 l12 10 M124 264 l12 10 M148 264 l12 10
+               M172 264 l12 10 M196 264 l12 10 M220 264 l12 10 M244 264 l12 10 M268 264 l12 10 M292 264 l12 10
+               M316 264 l12 10 M340 264 l12 10"/>
+    </g>
+
+    <g fill="none" stroke="#7d8ba3" stroke-width="1" stroke-dasharray="6 3 1 3">
+      <path d="M24 52 H190"/>
+      <path d="M24 124 H56"/>
+    </g>
+    <path d="M24 262 H356" fill="none" stroke="#1d3f6e" stroke-width="2.4"/>
+    <path d="M56 124 L190 52 L324 124" fill="none" stroke="#1d3f6e" stroke-width="2.4"/>
+    <rect x="248" y="36" width="20" height="62" fill="#f8f6ef" stroke="#1d3f6e" stroke-width="1.6"/>
+    <rect x="244" y="36" width="28" height="7" fill="#f8f6ef" stroke="#1d3f6e" stroke-width="1.6"/>
+
+    <g class="hatch" fill="url(#hatchElevS)">
+      <rect x="56" y="250" width="268" height="12"/>
+    </g>
+    <g fill="none" stroke="#1d3f6e">
+      <rect x="70" y="120" width="240" height="130" stroke-width="2.4"/>
+      <rect x="56" y="250" width="268" height="12" stroke-width="1.6"/>
+    </g>
+    <g fill="none" stroke="#1d3f6e" stroke-width="1.6">
+      <rect x="96" y="158" width="44" height="58"/>
+      <rect x="176" y="158" width="44" height="58"/>
+      <path d="M90 216 h56 M170 216 h56"/>
+      <rect x="244" y="190" width="40" height="60"/>
+      <path d="M236 250 h56"/>
+    </g>
+    <g fill="none" stroke="#1d3f6e" stroke-width="1">
+      <path d="M118 158 V216 M96 187 H140"/>
+      <path d="M198 158 V216 M176 187 H220"/>
+      <path d="M264 190 V250 M244 220 H284"/>
+    </g>
+
+    <g class="dims" fill="none" stroke="#1d3f6e" stroke-width="1">
+      <path d="M56 262 V304 M324 262 V304"/>
+      <path d="M56 298 H324"/>
+      <path d="M52 294 l8 8 M320 294 l8 8"/>
+    </g>
+
+    <g fill="#9b3a22">
+      <path d="M16 48 h8 l-4 8 z"/>
+      <path d="M16 120 h8 l-4 8 z"/>
+      <path d="M16 258 h8 l-4 8 z"/>
+    </g>
+
+    <g class="dtx" fill="#1d3f6e" font-size="13">
+      <text x="12" y="36">RIDGE +8.150</text>
+      <text x="12" y="86">EAVES +6.400</text>
+    </g>
+    <text class="dtx" x="12" y="286" fill="#9b3a22" font-size="13">&#177;0.000</text>
+    <text class="dtx num" x="190" y="292" fill="#1d3f6e" font-size="14" text-anchor="middle">12 600</text>
+
+    <g fill="none" stroke="#1d3f6e" stroke-width="1">
+      <path d="M270 50 L292 40"/>
+      <path d="M300 256 L322 282"/>
+    </g>
+    <g fill="#1d3f6e">
+      <circle cx="270" cy="50" r="2"/>
+      <circle cx="300" cy="256" r="2"/>
+    </g>
+    <g class="dtx" fill="#1d3f6e" font-size="13">
+      <text x="296" y="32">STACK,</text>
+      <text x="296" y="46">RETAINED</text>
+      <text x="326" y="290">PLINTH</text>
+    </g>
+  </svg>
+</template>
+
+<script>
+(function(){
+  var views = {
+    plan: {
+      sheet: "A-101",
+      name: "Ground-floor plan",
+      scale: "1:50",
+      facts: [
+        ["Gross internal area", "148.5 m\u00b2"],
+        ["Footprint", "12.60 \u00d7 8.40 m"],
+        ["Bay spacing", "3.15 m"],
+        ["Clear ceiling", "2.74 m"]
+      ],
+      dims: [
+        ["Overall width", "12 600"],
+        ["Overall depth", "8 400"],
+        ["Bay 1", "5 400"],
+        ["Bay 2", "7 200"],
+        ["Wall thickness", "340"]
+      ],
+      notes: [
+        "Existing masonry retained throughout; new openings are set out dashed.",
+        "Wall thickness verified on site at three positions.",
+        "Yard door approved at 900 mm clear."
+      ]
+    },
+    elev: {
+      sheet: "A-201",
+      name: "West elevation",
+      scale: "1:100",
+      facts: [
+        ["Ridge height", "+8.150 m"],
+        ["Eaves height", "+6.400 m"],
+        ["Plinth above datum", "+0.450 m"],
+        ["Roof pitch", "38\u00b0"]
+      ],
+      dims: [
+        ["Overall width", "12 600"],
+        ["Ridge level", "+8.150"],
+        ["Eaves level", "+6.400"],
+        ["Stack level", "+9.900"]
+      ],
+      notes: [
+        "Render and string course omitted for clarity.",
+        "Ground line taken at survey datum \u00b10.000.",
+        "Chimney stack retained; flaunching to be renewed."
+      ]
+    }
+  };
+
+  var state = { view: "plan", scale: "1:50", dims: true };
+
+  var drawing = document.getElementById("drawing");
+  var sheetId = document.getElementById("sheet-id");
+  var sheetName = document.getElementById("sheet-name");
+  var blockSheet = document.getElementById("block-sheet");
+  var blockScale = document.getElementById("block-scale");
+  var facts = document.getElementById("facts");
+  var dimsBody = document.getElementById("dims-body");
+  var notes = document.getElementById("notes");
+  var status = document.getElementById("demo-status");
+  var demoButton = document.getElementById("demo-action");
+  var dimToggle = document.getElementById("dim-toggle");
+  var scaleSelect = document.getElementById("scale-select");
+  var scalebar = document.getElementById("scalebar");
+  var scalebarCap = document.getElementById("scalebar-cap");
+  var templates = {
+    plan: {
+      full: document.getElementById("dwg-plan"),
+      small: document.getElementById("dwg-plan-sm")
+    },
+    elev: {
+      full: document.getElementById("dwg-elev"),
+      small: document.getElementById("dwg-elev-sm")
+    }
+  };
+  var small = false;
+
+  function fillList(target, rows){
+    target.replaceChildren();
+    rows.forEach(function(pair){
+      var row = document.createElement("div");
+      var dt = document.createElement("dt");
+      var dd = document.createElement("dd");
+      dt.textContent = pair[0];
+      dd.textContent = pair[1];
+      row.appendChild(dt);
+      row.appendChild(dd);
+      target.appendChild(row);
+    });
+  }
+
+  function fillDims(rows){
+    dimsBody.replaceChildren();
+    rows.forEach(function(pair){
+      var tr = document.createElement("tr");
+      var item = document.createElement("td");
+      var value = document.createElement("td");
+      item.textContent = pair[0];
+      value.className = "r";
+      value.textContent = pair[1];
+      tr.appendChild(item);
+      tr.appendChild(value);
+      dimsBody.appendChild(tr);
+    });
+  }
+
+  function fillNotes(items){
+    notes.replaceChildren();
+    items.forEach(function(text){
+      var li = document.createElement("li");
+      li.textContent = text;
+      notes.appendChild(li);
+    });
+  }
+
+  function renderScaleBar(scale){
+    var step = scale === "1:50" ? 1 : (scale === "1:100" ? 2 : 5);
+    var count = scale === "1:200" ? 3 : 4;
+    var i, seg;
+    scalebar.replaceChildren();
+    for(i = 0; i < count; i++){
+      seg = document.createElement("span");
+      seg.className = i % 2 ? "seg alt" : "seg";
+      var tick = document.createElement("span");
+      tick.className = "tick";
+      tick.textContent = String(i * step);
+      seg.appendChild(tick);
+      scalebar.appendChild(seg);
+    }
+    var end = document.createElement("span");
+    end.className = "tick end";
+    end.textContent = String(count * step);
+    seg.appendChild(end);
+    scalebarCap.textContent = "metres \u00b7 plotted at " + scale;
+  }
+
+  function applyLayers(){
+    var svg = drawing.querySelector("svg");
+    if(!svg){ return; }
+    svg.classList.toggle("lod-200", state.scale === "1:200");
+    svg.classList.toggle("dims-off", !state.dims);
+  }
+
+  function planStatus(){
+    var v = views[state.view];
+    return "Sheet " + v.sheet + " \u2014 " + v.name + ", " + state.scale +
+      ". Demo only: this swaps the drawing, the sheet number and the record from data held in this " +
+      "page. Nothing is exported, printed or sent.";
+  }
+
+  /* The sheet is drawn to fit its column. Below ~580px of sheet width the full
+     drawing's 12-unit dimension figures would fall under 10px, so the sheet swaps
+     to a compact general arrangement with fewer annotations — never a crop. */
+  function needsSmall(){
+    var width = drawing.getBoundingClientRect().width;
+    return width > 0 && width < 580;
+  }
+
+  function paintDrawing(animate){
+    small = needsSmall();
+    var set = templates[state.view];
+    drawing.replaceChildren((small ? set.small : set.full).content.cloneNode(true));
+    if(animate){
+      drawing.classList.remove("swap");
+      void drawing.offsetWidth;
+      drawing.classList.add("swap");
+    }
+    applyLayers();
+  }
+
+  function fitDrawing(){
+    if(needsSmall() !== small){ paintDrawing(false); }
+  }
+
+  function showView(key){
+    state.view = key;
+    var v = views[key];
+    state.scale = v.scale;
+
+    sheetId.textContent = v.sheet;
+    sheetName.textContent = v.name;
+    blockSheet.textContent = v.sheet;
+    blockScale.textContent = v.scale;
+    scaleSelect.value = v.scale;
+
+    paintDrawing(true);
+
+    fillList(facts, v.facts);
+    fillDims(v.dims);
+    fillNotes(v.notes);
+    renderScaleBar(state.scale);
+    applyLayers();
+
+    demoButton.textContent = key === "plan" ? "Switch to elevation" : "Switch to plan";
+    status.textContent = planStatus();
+  }
+
+  demoButton.addEventListener("click", function(){
+    showView(state.view === "plan" ? "elev" : "plan");
+  });
+
+  dimToggle.addEventListener("change", function(){
+    state.dims = dimToggle.checked;
+    applyLayers();
+    status.textContent = (state.dims ? "Dimension lines shown." : "Dimension lines hidden.") +
+      " Demo only \u2014 a local display toggle; nothing is exported or sent.";
+  });
+
+  scaleSelect.addEventListener("change", function(){
+    state.scale = scaleSelect.value;
+    blockScale.textContent = state.scale;
+    renderScaleBar(state.scale);
+    applyLayers();
+    var detail = state.scale === "1:200"
+      ? "general arrangement: wall poch\u00e9 and fittings hidden"
+      : "as drawn: wall poch\u00e9 and fittings shown";
+    status.textContent = "Plotted at " + state.scale + " \u2014 " + detail +
+      ". Demo only \u2014 the sheet is not re-plotted or exported.";
+  });
+
+  /* Specimen buttons report honestly into their group's live region. */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-demo]"), function(button){
+    button.addEventListener("click", function(){
+      var scope = button.closest("[data-demo-scope]") || document;
+      var slot = scope.querySelector("[data-demo-msg]");
+      if(!slot){ return; }
+      slot.textContent = "Demo only \u2014 \u201c" + button.textContent.trim() + "\u201d: " +
+        button.getAttribute("data-demo") + ". This is a specimen control; nothing leaves this page.";
+    });
+  });
+
+  document.getElementById("ref-form").addEventListener("submit", function(event){
+    event.preventDefault();
+    var input = document.getElementById("ref-input");
+    var msg = document.getElementById("ref-msg");
+    var value = input.value.trim();
+    if(!value){
+      input.setAttribute("aria-invalid", "true");
+      msg.textContent = "Demo only \u2014 enter any reference to see the accepted state. " +
+        "Nothing is sent and no sheet is amended.";
+      input.focus();
+      return;
+    }
+    input.removeAttribute("aria-invalid");
+    msg.textContent = "Demo only \u2014 \u201c" + value + "\u201d is not attached to any sheet; " +
+      "this specimen has no server.";
+  });
+
+  if(window.ResizeObserver){
+    new ResizeObserver(fitDrawing).observe(drawing);
+  } else {
+    window.addEventListener("resize", fitDrawing);
+  }
+
+  renderScaleBar(state.scale);
+  paintDrawing(false);
+})();
+</script>
+</body>
+</html>

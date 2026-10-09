@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORBITAL WATCH — Station Kestrel Mission Console</title>
+<style>
+  :root{
+    --void:#04070C; --void-2:#080D14; --panel:#0B1220; --hairline:#16283A;
+    --cyan:#39E1FF; --cyan-hi:#63E9FF; --cyan-lo:#25CCE8;
+    --lime:#B6F36B; --amber:#FFB86B; --dim:#6E8AA6; --text:#D7ECF7; --ink:#04070C;
+    --mono:ui-monospace,"SF Mono","Cascadia Mono","Cascadia Code",Consolas,"Liberation Mono",Menlo,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--void); color:var(--text); font:400 13px/1.55 var(--mono); -webkit-font-smoothing:antialiased}
+  /* decorative static scanlines: low opacity, no animation, never blocks input */
+  body::after{
+    content:""; position:fixed; inset:0; z-index:2; pointer-events:none; opacity:.35;
+    background:repeating-linear-gradient(180deg,rgba(57,225,255,.05) 0 1px,transparent 1px 4px);
+  }
+  :focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
+  [hidden]{display:none !important}
+  .skip{
+    position:absolute; left:-9999px; top:0; z-index:5; background:var(--cyan); color:var(--ink);
+    padding:8px 12px; text-decoration:none; font-size:12px; letter-spacing:.1em; text-transform:uppercase;
+  }
+  .skip:focus{left:8px; top:8px}
+  h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0}
+  ul,ol{padding:0; list-style:none}
+  .label{display:block; font-size:11px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--dim)}
+  .unit{font-size:11px; letter-spacing:.08em; color:var(--dim); margin-left:2px}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  .shell{max-width:1240px; margin:0 auto; padding:16px 16px 32px; display:grid; gap:16px}
+  @media (min-width:768px){ .shell{padding:24px 24px 48px} }
+
+  /* ---------- panel primitive ---------- */
+  .panel{position:relative; background:var(--panel); border:1px solid var(--hairline); border-radius:2px; min-width:0}
+  .panel__head{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px;
+    padding:8px 16px; border-bottom:1px solid var(--hairline); min-height:40px;
+  }
+  .panel__head h2{font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase}
+  .panel__meta{font-size:11px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase}
+  .panel__body{padding:16px}
+
+  /* ---------- top bar ---------- */
+  .topbar{padding:16px; display:grid; gap:16px}
+  .topbar::before,.topbar::after{
+    content:""; position:absolute; width:14px; height:14px; border:1px solid var(--cyan); opacity:.5; pointer-events:none;
+  }
+  .topbar::before{top:-1px; left:-1px; border-right:0; border-bottom:0}
+  .topbar::after{bottom:-1px; right:-1px; border-left:0; border-top:0}
+  .topbar__head{display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; justify-content:space-between}
+  .eyebrow{font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--dim)}
+  h1{
+    font-size:clamp(20px,5vw,28px); font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+    line-height:1.15; margin-top:4px; overflow-wrap:anywhere;
+  }
+  .topbar__meta{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px}
+  .kv{border-left:1px solid var(--hairline); padding-left:8px; min-width:0}
+  .kv .value{display:block; margin-top:4px; font-size:13px; font-variant-numeric:tabular-nums; overflow-wrap:anywhere}
+
+  a.linkstyles{
+    display:inline-block; padding:6px 10px; border:1px solid var(--hairline); border-radius:2px;
+    color:var(--text); text-decoration:none; font-size:11.5px; letter-spacing:.12em; text-transform:uppercase;
+    transition:border-color 120ms cubic-bezier(.2,.7,.3,1), color 120ms cubic-bezier(.2,.7,.3,1), background-color 120ms cubic-bezier(.2,.7,.3,1);
+  }
+  a.linkstyles:hover{border-color:var(--cyan); color:var(--cyan); background:rgba(57,225,255,.06)}
+  a.linkstyles:active{background:rgba(57,225,255,.12)}
+
+  /* ---------- pills ---------- */
+  .pillrow{display:flex; flex-wrap:wrap; gap:8px}
+  .pill{
+    display:inline-flex; align-items:center; gap:8px; height:22px; padding:0 10px; max-width:100%;
+    border:1px solid var(--hairline); border-radius:2px; background:var(--void-2);
+    font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim);
+    transition:border-color 120ms linear, background-color 120ms linear, color 120ms linear;
+  }
+  .pill:hover{border-color:#1E3A54}
+  .pill__glyph{width:6px; height:6px; flex:none; background:currentColor}
+  .pill__key{color:var(--text); letter-spacing:.14em}
+  .pill--ok{color:var(--lime); border-color:rgba(182,243,107,.35); background:rgba(182,243,107,.08)}
+  .pill--warn{color:var(--amber); border-color:rgba(255,184,107,.4); background:rgba(255,184,107,.1)}
+  .pill--sel{box-shadow:inset 0 -2px 0 currentColor}
+
+  /* ---------- buttons ---------- */
+  .btnrow{display:flex; flex-wrap:wrap; gap:8px}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; height:32px; padding:0 12px;
+    border:1px solid transparent; border-radius:2px; background:transparent; cursor:pointer;
+    font:600 11.5px/1 var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--text); max-width:100%;
+    transition:background-color 120ms cubic-bezier(.2,.7,.3,1), border-color 120ms cubic-bezier(.2,.7,.3,1),
+               color 120ms cubic-bezier(.2,.7,.3,1), transform 120ms cubic-bezier(.2,.7,.3,1);
+  }
+  .btn--primary{background:var(--cyan); color:var(--ink)}
+  .btn--primary:hover{background:var(--cyan-hi)}
+  .btn--primary:active{background:var(--cyan-lo); transform:translateY(1px)}
+  .btn--secondary{border-color:var(--hairline); color:var(--text)}
+  .btn--secondary:hover{border-color:var(--cyan); color:var(--cyan); background:rgba(57,225,255,.06)}
+  .btn--secondary:active{background:rgba(57,225,255,.12); transform:translateY(1px)}
+  .btn--ghost{color:var(--dim)}
+  .btn--ghost:hover{color:var(--text); background:#0F1A2A}
+  .btn--ghost:active{background:#101E30; transform:translateY(1px)}
+  .btn[aria-pressed="true"]{border-color:var(--cyan); color:var(--cyan); background:rgba(57,225,255,.08)}
+  .btn:disabled{background:var(--hairline); border-color:var(--hairline); color:#8AA6C0; cursor:not-allowed; transform:none}
+  .hint{font:400 12.5px/1.6 var(--sans); color:var(--dim); max-width:68ch; overflow-wrap:anywhere}
+  .statusline{
+    font-size:12px; letter-spacing:.04em; color:var(--cyan); border-left:2px solid var(--cyan);
+    padding-left:8px; overflow-wrap:anywhere;
+  }
+
+  /* ---------- inputs ---------- */
+  .field{display:grid; gap:4px; min-width:0}
+  .input{
+    height:32px; padding:0 8px; width:100%; max-width:100%; min-width:0;
+    background:var(--void-2); border:1px solid var(--hairline); border-radius:2px;
+    color:var(--text); font:400 12.5px/1 var(--mono); letter-spacing:.02em;
+    transition:border-color 120ms linear, background-color 120ms linear;
+  }
+  .input::placeholder{color:var(--dim)}
+  .input:hover{border-color:#1E3A54}
+  .input:focus{border-color:var(--cyan)}
+  select.input{
+    appearance:none; padding-right:24px;
+    background-image:linear-gradient(45deg,transparent 50%,#6E8AA6 50%),linear-gradient(135deg,#6E8AA6 50%,transparent 50%);
+    background-position:calc(100% - 14px) 14px,calc(100% - 10px) 14px;
+    background-size:4px 4px,4px 4px; background-repeat:no-repeat;
+  }
+  .helper{font-size:11px; color:var(--dim); letter-spacing:.06em; overflow-wrap:anywhere}
+
+  /* toggle — a real checkbox, keyboard operable */
+  .toggle{display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim)}
+  .toggle input{position:absolute; opacity:0; width:1px; height:1px}
+  .toggle__track{
+    position:relative; width:34px; height:18px; flex:none; border:1px solid var(--hairline); border-radius:2px;
+    background:var(--void-2); transition:border-color 120ms linear, background-color 120ms linear;
+  }
+  .toggle__track::after{
+    content:""; position:absolute; top:2px; left:2px; width:12px; height:12px; background:var(--dim);
+    transition:transform 120ms cubic-bezier(.2,.7,.3,1), background-color 120ms linear;
+  }
+  .toggle:hover .toggle__track{border-color:#1E3A54}
+  .toggle input:checked + .toggle__track{background:rgba(57,225,255,.18); border-color:var(--cyan)}
+  .toggle input:checked + .toggle__track::after{background:var(--cyan); transform:translateX(16px)}
+  .toggle input:checked ~ .toggle__text{color:var(--text)}
+  .toggle input:focus-visible + .toggle__track{outline:2px solid var(--cyan); outline-offset:2px}
+
+  /* ---------- grid ---------- */
+  .grid{display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:12px}
+  .grid > *{min-width:0}
+  .span-8{grid-column:span 8}
+  .span-7{grid-column:span 7}
+  .span-5{grid-column:span 5}
+  .span-4{grid-column:span 4}
+  @media (max-width:1099px){ .span-8,.span-7,.span-5,.span-4{grid-column:1 / -1} }
+
+  /* ---------- chart ---------- */
+  .controls{display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; justify-content:space-between; margin-bottom:12px}
+  .readouts{display:flex; flex-wrap:wrap; gap:16px; min-width:0}
+  .readout{min-width:0}
+  .readout .value{
+    display:block; margin-top:2px; font-size:16px; font-weight:600; letter-spacing:.02em;
+    font-variant-numeric:tabular-nums;
+  }
+  .value--ok{color:var(--lime)}
+  .value--warn{color:var(--amber)}
+  .figure{margin:0; display:grid; gap:8px}
+  .plot{
+    position:relative; overflow:hidden; background:var(--void-2); border:1px solid var(--hairline);
+    box-shadow:inset 0 0 40px -24px var(--cyan);
+    transition:opacity 200ms linear;
+  }
+  .plot--fade{opacity:.55}
+  .plot svg{display:block; width:100%; height:auto}
+  .gridlines line{stroke:#16283A; stroke-width:1}
+  .axis text{fill:#6E8AA6; font:400 10px var(--mono); letter-spacing:.08em}
+  .sweep{
+    position:absolute; top:0; bottom:0; left:0; width:30%; pointer-events:none;
+    background:linear-gradient(90deg,transparent,rgba(57,225,255,.10),transparent);
+    animation:sweep 18s linear infinite;
+  }
+  @keyframes sweep{from{transform:translateX(-100%)} to{transform:translateX(400%)}}
+  .figure figcaption{font:400 12px/1.6 var(--sans); color:var(--dim); overflow-wrap:anywhere}
+  .tablewrap{margin-top:12px; overflow-x:auto; border:1px solid var(--hairline); background:var(--void-2)}
+  table.dtable{width:100%; min-width:480px; border-collapse:collapse; font-size:12.5px; font-variant-numeric:tabular-nums}
+  table.dtable caption{text-align:left; padding:8px 12px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); border-bottom:1px solid var(--hairline)}
+  table.dtable th,table.dtable td{padding:7px 12px; text-align:left; border-bottom:1px solid var(--hairline)}
+  table.dtable thead th{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); font-weight:500}
+  table.dtable tbody tr:hover{background:#0F1A2A}
+  table.dtable tbody th{font-weight:400; color:var(--text)}
+
+  /* ---------- channel table ---------- */
+  .chtable{width:100%; border-collapse:collapse; font-size:12.5px; font-variant-numeric:tabular-nums}
+  .chtable caption{text-align:left; padding:8px 0; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim)}
+  .chtable th,.chtable td{padding:8px 12px; text-align:left; border-bottom:1px solid var(--hairline); vertical-align:middle}
+  .chtable thead th{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); font-weight:500}
+  .chtable tbody tr:hover{background:#0F1A2A}
+  .chtable tbody tr[aria-current="true"]{background:rgba(57,225,255,.05); box-shadow:inset 2px 0 0 var(--cyan)}
+  .chtable__code{font-weight:600; letter-spacing:.12em}
+  .chtable__name{color:var(--dim); font-size:11.5px; display:block; letter-spacing:.04em}
+
+  /* ---------- meters ---------- */
+  .meters{display:grid; gap:20px}
+  .meter{margin-top:8px; height:10px; background:var(--void-2); border:1px solid var(--hairline); position:relative; overflow:hidden}
+  .meter__fill{display:block; height:100%; background:var(--cyan); transition:width 400ms cubic-bezier(.2,.7,.3,1)}
+  .meter__fill--warn{background:var(--amber)}
+  .meter__fill--ok{background:var(--lime)}
+  .meterrow__top{display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap}
+  .meterrow__val{font-size:22px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:.02em}
+  .meterrow__note{font-size:11px; letter-spacing:.06em; color:var(--dim); margin-top:6px; overflow-wrap:anywhere}
+  .meterrow__state{color:var(--lime)}
+  .meterrow__state--warn{color:var(--amber)}
+
+  /* ---------- log ---------- */
+  .logbar{display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; justify-content:space-between; margin-bottom:12px}
+  .logbar .field{flex:1 1 180px}
+  .log{
+    max-height:236px; overflow-y:auto; overflow-x:hidden; background:var(--void-2);
+    border:1px solid var(--hairline); box-shadow:inset 0 0 40px -24px var(--cyan);
+  }
+  .log__row{
+    display:flex; flex-wrap:wrap; gap:8px; padding:8px 12px; border-bottom:1px solid var(--hairline);
+    font-size:12.5px; transition:background-color 120ms linear;
+  }
+  .log__row:hover{background:#0F1A2A}
+  .log__row:last-child{border-bottom:0}
+  .log__time{color:var(--cyan); flex:none; font-variant-numeric:tabular-nums}
+  .log__src{color:var(--dim); flex:none; letter-spacing:.1em}
+  .log__text{flex:1 1 160px; min-width:0; overflow-wrap:anywhere}
+  .log__empty{padding:12px; font-size:12.5px; color:var(--dim)}
+  .logcount{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim)}
+  .logfoot{padding-top:12px}
+
+  /* ---------- footer ---------- */
+  .foot{
+    border-top:1px solid var(--hairline); padding-top:16px; display:flex; flex-wrap:wrap; gap:8px 16px;
+    justify-content:space-between; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim);
+  }
+
+  @media (max-width:639px){
+    .shell{padding:12px 12px 24px}
+    .panel__head{padding:8px 12px}
+    .panel__body{padding:12px}
+    .topbar{padding:12px}
+    .meterrow__val{font-size:18px}
+    h1{font-size:20px}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none !important; transition:none !important}
+    .sweep{display:none}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to console</a>
+
+<div class="shell">
+
+  <header class="panel topbar">
+    <div class="topbar__head">
+      <div>
+        <p class="eyebrow">Orbital Watch · Deep Relay Division</p>
+        <h1>Station Kestrel — Mission Console</h1>
+      </div>
+      <nav aria-label="Style index">
+        <a class="linkstyles" href="index.html">All styles</a>
+      </nav>
+    </div>
+    <div class="topbar__meta">
+      <div class="kv">
+        <span class="label">Mission id</span>
+        <span class="value">KST-4471 / ORB-04</span>
+      </div>
+      <div class="kv">
+        <span class="label">UTC</span>
+        <time class="value" id="stamp" datetime="2026-10-08T04:12:00Z">2026-10-08 · 04:12:00Z</time>
+      </div>
+      <div class="kv">
+        <span class="label">Orbit</span>
+        <span class="value">LEO 41.2° / 412 km</span>
+      </div>
+      <div class="kv">
+        <span class="label">Crew</span>
+        <span class="value">6 aboard · 2 EVA ready</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" style="display:grid; gap:16px">
+
+    <section class="panel" aria-labelledby="status-h">
+      <div class="panel__head">
+        <h2 id="status-h">Subsystem status</h2>
+        <p class="panel__meta">Poll <span id="poll-meta">04:12:00Z</span> · 5 channels</p>
+      </div>
+      <div class="panel__body pillrow" id="pillrow">
+        <span class="pill pill--ok" data-pill="gnc"><span class="pill__glyph" aria-hidden="true"></span><span class="pill__key">GNC</span> <span class="pill__state">Nominal</span></span>
+        <span class="pill pill--ok" data-pill="tcs"><span class="pill__glyph" aria-hidden="true"></span><span class="pill__key">TCS</span> <span class="pill__state">Nominal</span></span>
+        <span class="pill pill--ok" data-pill="comm"><span class="pill__glyph" aria-hidden="true"></span><span class="pill__key">COMM</span> <span class="pill__state">Nominal</span></span>
+        <span class="pill pill--ok" data-pill="eps"><span class="pill__glyph" aria-hidden="true"></span><span class="pill__key">EPS</span> <span class="pill__state">Nominal</span></span>
+        <span class="pill pill--ok" data-pill="eclss"><span class="pill__glyph" aria-hidden="true"></span><span class="pill__key">ECLSS</span> <span class="pill__state">Nominal</span></span>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="demo-h">
+      <div class="panel__head">
+        <h2 id="demo-h">Console commands</h2>
+        <p class="panel__meta"><span id="snap-badge">Snapshot 1 of 3</span> · local sample data</p>
+      </div>
+      <div class="panel__body" style="display:grid; gap:12px">
+        <div class="btnrow">
+          <button class="btn btn--primary" type="button" id="demo-action" aria-label="Demo: load next telemetry snapshot">
+            Demo · load next snapshot
+          </button>
+          <button class="btn btn--secondary" type="button" id="pause-sweep" aria-pressed="false">
+            Pause sweep
+          </button>
+          <button class="btn btn--ghost" type="button" id="reset-view">
+            Reset view
+          </button>
+          <button class="btn btn--ghost" type="button" disabled>
+            Uplink · not simulated
+          </button>
+        </div>
+        <p class="hint">Interactive demo — changes are local only. Every reading below is precomputed sample data; no uplink, ground station, or network request is involved.</p>
+        <p class="statusline" id="demo-status" role="status" aria-live="polite">Demo: snapshot 1 of 3 loaded from local sample data.</p>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="panel span-8" aria-labelledby="telemetry-h">
+        <div class="panel__head">
+          <h2 id="telemetry-h">Telemetry · structural load</h2>
+          <p class="panel__meta"><span id="window-meta">Window 55 min</span> · rate 5 min</p>
+        </div>
+        <div class="panel__body">
+          <div class="controls">
+            <div class="field">
+              <label class="label" for="range-select">Chart range</label>
+              <select class="input" id="range-select">
+                <option value="12" selected>Last 55 min — 12 samples</option>
+                <option value="9">Last 40 min — 9 samples</option>
+                <option value="6">Last 25 min — 6 samples</option>
+              </select>
+            </div>
+            <dl class="readouts">
+              <div class="readout">
+                <dt class="label">Current load</dt>
+                <dd class="value"><span id="load-now">30.0</span><span class="unit">%</span></dd>
+              </div>
+              <div class="readout">
+                <dt class="label">Window peak</dt>
+                <dd class="value"><span id="load-peak">41.0</span><span class="unit">%</span></dd>
+              </div>
+              <div class="readout">
+                <dt class="label">Trend</dt>
+                <dd class="value value--ok" id="load-trend">−3.0<span class="unit">/ 5 min</span></dd>
+              </div>
+            </dl>
+          </div>
+
+          <figure class="figure">
+            <div class="plot">
+              <svg viewBox="0 0 640 200" role="img" id="chart" aria-label="Structural load across the last 55 minutes: starts at 18.0 percent, peaks at 41.0 percent at T+40, ends at 30.0 percent.">
+                <defs>
+                  <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#39E1FF" stop-opacity="0.28"></stop>
+                    <stop offset="1" stop-color="#39E1FF" stop-opacity="0"></stop>
+                  </linearGradient>
+                </defs>
+                <g class="gridlines" aria-hidden="true">
+                  <line x1="34" y1="176" x2="628" y2="176"></line>
+                  <line x1="34" y1="135.5" x2="628" y2="135.5"></line>
+                  <line x1="34" y1="95" x2="628" y2="95"></line>
+                  <line x1="34" y1="54.5" x2="628" y2="54.5"></line>
+                  <line x1="34" y1="14" x2="628" y2="14"></line>
+                </g>
+                <g class="axis" aria-hidden="true">
+                  <text x="28" y="180" text-anchor="end">0</text>
+                  <text x="28" y="139.5" text-anchor="end">15</text>
+                  <text x="28" y="99" text-anchor="end">30</text>
+                  <text x="28" y="58.5" text-anchor="end">45</text>
+                  <text x="28" y="18" text-anchor="end">60</text>
+                  <text x="34" y="194">T+00</text>
+                  <text x="331" y="194" text-anchor="middle">elapsed</text>
+                  <text x="628" y="194" text-anchor="end" id="axis-end">T+55</text>
+                </g>
+                <path id="area" d="M34.0,176 L34.0,127.4 L88.0,116.6 L142.0,119.3 L196.0,105.8 L250.0,92.3 L304.0,97.7 L358.0,84.2 L412.0,73.4 L466.0,65.3 L520.0,76.1 L574.0,86.9 L628.0,95.0 L628.0,176 Z" fill="url(#areaFill)"></path>
+                <polyline id="trace" points="34.0,127.4 88.0,116.6 142.0,119.3 196.0,105.8 250.0,92.3 304.0,97.7 358.0,84.2 412.0,73.4 466.0,65.3 520.0,76.1 574.0,86.9 628.0,95.0" fill="none" stroke="#39E1FF" stroke-width="1.5"></polyline>
+                <circle id="lastdot" cx="628" cy="95" r="3" fill="#39E1FF" aria-hidden="true"></circle>
+              </svg>
+              <span class="sweep" id="sweep" aria-hidden="true"></span>
+            </div>
+            <figcaption id="chart-caption">Structural load, 12 samples at 5-minute spacing. Cyan trace with cyan area fill; peak 41.0 % at T+40, current 30.0 %.</figcaption>
+          </figure>
+
+          <div class="tablewrap">
+            <table class="dtable">
+              <caption>Sample values · structural load (% of design limit)</caption>
+              <thead>
+                <tr><th scope="col">Sample</th><th scope="col">Load</th><th scope="col">Δ / 5 min</th></tr>
+              </thead>
+              <tbody id="chart-rows">
+                <tr><th scope="row">T+00</th><td>18.0</td><td>—</td></tr>
+                <tr><th scope="row">T+05</th><td>22.0</td><td>+4.0</td></tr>
+                <tr><th scope="row">T+10</th><td>21.0</td><td>−1.0</td></tr>
+                <tr><th scope="row">T+15</th><td>26.0</td><td>+5.0</td></tr>
+                <tr><th scope="row">T+20</th><td>31.0</td><td>+5.0</td></tr>
+                <tr><th scope="row">T+25</th><td>29.0</td><td>−2.0</td></tr>
+                <tr><th scope="row">T+30</th><td>34.0</td><td>+5.0</td></tr>
+                <tr><th scope="row">T+35</th><td>38.0</td><td>+4.0</td></tr>
+                <tr><th scope="row">T+40</th><td>41.0</td><td>+3.0</td></tr>
+                <tr><th scope="row">T+45</th><td>37.0</td><td>−4.0</td></tr>
+                <tr><th scope="row">T+50</th><td>33.0</td><td>−4.0</td></tr>
+                <tr><th scope="row">T+55</th><td>30.0</td><td>−3.0</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel span-4" aria-labelledby="power-h">
+        <div class="panel__head">
+          <h2 id="power-h">Resource reserves</h2>
+          <p class="panel__meta">Threshold 75 %</p>
+        </div>
+        <div class="panel__body meters">
+          <div class="meterrow">
+            <div class="meterrow__top">
+              <span class="label" id="power-label">Battery bank · usable</span>
+              <span class="meterrow__val"><span id="power-val">87.4</span><span class="unit">%</span></span>
+            </div>
+            <div class="meter" id="meter-power" role="progressbar" aria-labelledby="power-label" aria-valuemin="0" aria-valuemax="100" aria-valuenow="87.4" aria-valuetext="87.4 percent, nominal">
+              <span class="meter__fill meter__fill--ok" id="power-fill" style="width:87.4%"></span>
+            </div>
+            <p class="meterrow__note"><span id="power-note">Array B + C combined · draw 6.1 kW</span> · <span class="meterrow__state" id="power-state">Nominal</span></p>
+          </div>
+
+          <div class="meterrow">
+            <div class="meterrow__top">
+              <span class="label" id="o2-label">Oxygen reserve · 6 crew</span>
+              <span class="meterrow__val"><span id="o2-val">96.2</span><span class="unit">%</span></span>
+            </div>
+            <div class="meter" id="meter-o2" role="progressbar" aria-labelledby="o2-label" aria-valuemin="0" aria-valuemax="100" aria-valuenow="96.2" aria-valuetext="96.2 percent, nominal">
+              <span class="meter__fill" id="o2-fill" style="width:96.2%"></span>
+            </div>
+            <p class="meterrow__note"><span id="o2-note">Scrubber cycle 12 · ppO2 21.3 kPa</span> · <span class="meterrow__state" id="o2-state">Nominal</span></p>
+          </div>
+
+          <p class="hint">Reserve figures describe one orbit of sample data; they change only when the demo snapshot changes.</p>
+        </div>
+      </section>
+
+      <section class="panel span-7" aria-labelledby="channels-h">
+        <div class="panel__head">
+          <h2 id="channels-h">Subsystem channels</h2>
+          <p class="panel__meta">Updated <span id="channels-meta">04:12:00Z</span></p>
+        </div>
+        <div class="panel__body">
+          <div class="tablewrap" style="margin-top:0">
+            <table class="chtable">
+              <caption>Channel table · the snapshot channel under watch is marked</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Channel</th>
+                  <th scope="col">Primary readout</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody id="channel-rows">
+                <tr data-ch="gnc" aria-current="true">
+                  <th scope="row"><span class="chtable__code">GNC</span><span class="chtable__name">Attitude &amp; orbit</span></th>
+                  <td id="ch-read-gnc">0.003° heading drift</td>
+                  <td><span class="pill pill--ok" data-chpill="gnc"><span class="pill__glyph" aria-hidden="true"></span>Nominal</span></td>
+                </tr>
+                <tr data-ch="tcs" aria-current="false">
+                  <th scope="row"><span class="chtable__code">TCS</span><span class="chtable__name">Thermal control</span></th>
+                  <td id="ch-read-tcs">12.4 °C loop 2 outlet</td>
+                  <td><span class="pill pill--ok" data-chpill="tcs"><span class="pill__glyph" aria-hidden="true"></span>Nominal</span></td>
+                </tr>
+                <tr data-ch="comm" aria-current="false">
+                  <th scope="row"><span class="chtable__code">COMM</span><span class="chtable__name">S-band uplink</span></th>
+                  <td id="ch-read-comm">3.1 dB margin</td>
+                  <td><span class="pill pill--ok" data-chpill="comm"><span class="pill__glyph" aria-hidden="true"></span>Nominal</span></td>
+                </tr>
+                <tr data-ch="eps" aria-current="false">
+                  <th scope="row"><span class="chtable__code">EPS</span><span class="chtable__name">Solar array</span></th>
+                  <td id="ch-read-eps">4.71 kW array B yield</td>
+                  <td><span class="pill pill--ok" data-chpill="eps"><span class="pill__glyph" aria-hidden="true"></span>Nominal</span></td>
+                </tr>
+                <tr data-ch="eclss" aria-current="false">
+                  <th scope="row"><span class="chtable__code">ECLSS</span><span class="chtable__name">Life support</span></th>
+                  <td id="ch-read-eclss">21.3 kPa ppO2</td>
+                  <td><span class="pill pill--ok" data-chpill="eclss"><span class="pill__glyph" aria-hidden="true"></span>Nominal</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel span-5" aria-labelledby="log-h">
+        <div class="panel__head">
+          <h2 id="log-h">Event log</h2>
+          <p class="panel__meta"><span id="log-count">4 entries</span></p>
+        </div>
+        <div class="panel__body">
+          <div class="logbar">
+            <div class="field">
+              <label class="label" for="log-filter">Filter events</label>
+              <input class="input" type="text" id="log-filter" placeholder="subsystem or keyword…" autocomplete="off">
+            </div>
+            <p class="helper" id="filter-hint">Matching is local text only.</p>
+          </div>
+          <ul class="log" id="log">
+            <li class="log__row">
+              <time class="log__time" datetime="2026-10-08T04:02:11Z">04:02:11Z</time>
+              <span class="log__src">[EPS]</span>
+              <span class="log__text">Array B yield 4.71 kW, within envelope</span>
+            </li>
+            <li class="log__row">
+              <time class="log__time" datetime="2026-10-08T04:05:48Z">04:05:48Z</time>
+              <span class="log__src">[GNC]</span>
+              <span class="log__text">Star tracker reacquisition complete, drift 0.003°</span>
+            </li>
+            <li class="log__row">
+              <time class="log__time" datetime="2026-10-08T04:09:02Z">04:09:02Z</time>
+              <span class="log__src">[ECLSS]</span>
+              <span class="log__text">Cabin ppO2 21.3 kPa, scrubber cycle 12 complete</span>
+            </li>
+            <li class="log__row">
+              <time class="log__time" datetime="2026-10-08T04:11:37Z">04:11:37Z</time>
+              <span class="log__src">[COMM]</span>
+              <span class="log__text">S-band uplink margin 3.1 dB, nominal</span>
+            </li>
+          </ul>
+          <p class="log__empty" id="log-empty" hidden>No entries match that filter.</p>
+          <div class="logfoot">
+            <label class="toggle" for="follow-toggle">
+              <input type="checkbox" id="follow-toggle" checked>
+              <span class="toggle__track" aria-hidden="true"></span>
+              <span class="toggle__text">Follow newest event</span>
+            </label>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <p>Orbital Watch · Station Kestrel · schematic console</p>
+    <p>Local sample data · no uplink state</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var SNAPS = [
+    {
+      stamp: "2026-10-08 · 04:12:00Z",
+      iso: "2026-10-08T04:12:00Z",
+      clock: "04:12:00Z",
+      power: 87.4, powerNote: "Array B + C combined · draw 6.1 kW",
+      o2: 96.2, o2Note: "Scrubber cycle 12 · ppO2 21.3 kPa",
+      load: [18, 22, 21, 26, 31, 29, 34, 38, 41, 37, 33, 30],
+      focus: "gnc",
+      pills: { gnc: "ok", tcs: "ok", comm: "ok", eps: "ok", eclss: "ok" },
+      rows: {
+        gnc: ["0.003° heading drift", "ok"],
+        tcs: ["12.4 °C loop 2 outlet", "ok"],
+        comm: ["3.1 dB margin", "ok"],
+        eps: ["4.71 kW array B yield", "ok"],
+        eclss: ["21.3 kPa ppO2", "ok"]
+      },
+      entryTime: "04:12:00Z",
+      entrySrc: "[OPS]",
+      entryText: "Window 04:12:00Z replayed — structural load 30.0 %, no action required"
+    },
+    {
+      stamp: "2026-10-08 · 04:14:22Z",
+      iso: "2026-10-08T04:14:22Z",
+      clock: "04:14:22Z",
+      power: 78.6, powerNote: "Array B + C combined · draw 7.4 kW, trending down",
+      o2: 93.8, o2Note: "Scrubber cycle 13 · ppO2 21.1 kPa",
+      load: [24, 27, 25, 31, 36, 42, 47, 44, 49, 52, 48, 44],
+      focus: "tcs",
+      pills: { gnc: "ok", tcs: "warn", comm: "ok", eps: "ok", eclss: "ok" },
+      rows: {
+        gnc: ["0.004° heading drift", "ok"],
+        tcs: ["18.9 °C loop 2 outlet", "warn"],
+        comm: ["3.0 dB margin", "ok"],
+        eps: ["4.02 kW array B yield", "ok"],
+        eclss: ["21.1 kPa ppO2", "ok"]
+      },
+      entryTime: "04:14:22Z",
+      entrySrc: "[TCS]",
+      entryText: "Radiator loop 2 outlet 18.9 °C — above nominal band, load 44.0 %"
+    },
+    {
+      stamp: "2026-10-08 · 04:16:05Z",
+      iso: "2026-10-08T04:16:05Z",
+      clock: "04:16:05Z",
+      power: 91.3, powerNote: "Array B + C combined · draw 5.4 kW, recovering",
+      o2: 97.1, o2Note: "Scrubber cycle 13 · ppO2 21.4 kPa",
+      load: [12, 15, 19, 17, 22, 20, 25, 23, 28, 26, 31, 29],
+      focus: "eps",
+      pills: { gnc: "ok", tcs: "ok", comm: "ok", eps: "ok", eclss: "ok" },
+      rows: {
+        gnc: ["0.003° heading drift", "ok"],
+        tcs: ["12.1 °C loop 2 outlet", "ok"],
+        comm: ["3.2 dB margin", "ok"],
+        eps: ["4.88 kW array B yield", "ok"],
+        eclss: ["21.4 kPa ppO2", "ok"]
+      },
+      entryTime: "04:16:05Z",
+      entrySrc: "[TCS]",
+      entryText: "Loop 2 outlet back to 12.1 °C — thermal band recovered, load 29.0 %"
+    }
+  ];
+
+  var X0 = 34, X1 = 628, TOP = 14, BOT = 176, MAXV = 60, SPACING = 5, MAX_ROWS = 12;
+
+  var el = {
+    stamp: document.getElementById("stamp"),
+    poll: document.getElementById("poll-meta"),
+    badge: document.getElementById("snap-badge"),
+    windowMeta: document.getElementById("window-meta"),
+    trace: document.getElementById("trace"),
+    area: document.getElementById("area"),
+    dot: document.getElementById("lastdot"),
+    axisEnd: document.getElementById("axis-end"),
+    chart: document.getElementById("chart"),
+    plot: document.querySelector(".plot"),
+    caption: document.getElementById("chart-caption"),
+    rows: document.getElementById("chart-rows"),
+    loadNow: document.getElementById("load-now"),
+    loadPeak: document.getElementById("load-peak"),
+    loadTrend: document.getElementById("load-trend"),
+    powerVal: document.getElementById("power-val"),
+    powerFill: document.getElementById("power-fill"),
+    powerMeter: document.getElementById("meter-power"),
+    powerNote: document.getElementById("power-note"),
+    powerState: document.getElementById("power-state"),
+    o2Val: document.getElementById("o2-val"),
+    o2Fill: document.getElementById("o2-fill"),
+    o2Meter: document.getElementById("meter-o2"),
+    o2Note: document.getElementById("o2-note"),
+    o2State: document.getElementById("o2-state"),
+    channelsMeta: document.getElementById("channels-meta"),
+    channels: document.getElementById("channel-rows"),
+    log: document.getElementById("log"),
+    logCount: document.getElementById("log-count"),
+    logEmpty: document.getElementById("log-empty"),
+    filter: document.getElementById("log-filter"),
+    follow: document.getElementById("follow-toggle"),
+    status: document.getElementById("demo-status"),
+    select: document.getElementById("range-select"),
+    sweep: document.getElementById("sweep"),
+    pills: document.querySelectorAll("[data-pill]"),
+    chRows: document.querySelectorAll("#channel-rows tr[data-ch]")
+  };
+
+  var state = { snap: 0, range: 12 };
+
+  function fmt(n) { return Number(n).toFixed(1); }
+
+  function windowValues() {
+    var all = SNAPS[state.snap].load;
+    return all.slice(all.length - state.range);
+  }
+
+  function geometry(vals) {
+    var n = vals.length, step = (X1 - X0) / (n - 1), points = [], area = "M" + X0 + "," + BOT, i, x, y;
+    for (i = 0; i < n; i++) {
+      x = X0 + i * step;
+      y = BOT - (vals[i] / MAXV) * (BOT - TOP);
+      points.push(x.toFixed(1) + "," + y.toFixed(1));
+      area += " L" + x.toFixed(1) + "," + y.toFixed(1);
+    }
+    area += " L" + X1 + "," + BOT + " Z";
+    return { points: points, path: area };
+  }
+
+  function pillClass(kind) { return kind === "warn" ? "pill pill--warn" : "pill pill--ok"; }
+  function pillWord(kind) { return kind === "warn" ? "Warning" : "Nominal"; }
+
+  function renderChart() {
+    var vals = windowValues(), n = vals.length, span = (n - 1) * SPACING;
+    var geo = geometry(vals);
+    var peak = Math.max.apply(null, vals);
+    var peakAt = vals.indexOf(peak) * SPACING;
+    var delta = vals[n - 1] - vals[n - 2];
+    var last = geo.points[n - 1].split(",");
+
+    el.trace.setAttribute("points", geo.points.join(" "));
+    el.area.setAttribute("d", geo.path);
+    el.dot.setAttribute("cx", last[0]);
+    el.dot.setAttribute("cy", last[1]);
+    el.axisEnd.textContent = "T+" + span;
+
+    el.loadNow.textContent = fmt(vals[n - 1]);
+    el.loadPeak.textContent = fmt(peak);
+    el.loadTrend.textContent = (delta < 0 ? "−" : "+") + fmt(Math.abs(delta));
+    el.loadTrend.className = "value " + (delta < 0 ? "value--ok" : "value--warn");
+    el.windowMeta.textContent = "Window " + span + " min";
+
+    el.chart.setAttribute("aria-label",
+      "Structural load across the last " + span + " minutes: starts at " + fmt(vals[0]) +
+      " percent, peaks at " + fmt(peak) + " percent at T+" + peakAt +
+      ", ends at " + fmt(vals[n - 1]) + " percent.");
+    el.caption.textContent = "Structural load, " + n + " samples at 5-minute spacing. Cyan trace with cyan area fill; peak " +
+      fmt(peak) + " % at T+" + peakAt + ", current " + fmt(vals[n - 1]) + " %.";
+
+    while (el.rows.firstChild) { el.rows.removeChild(el.rows.firstChild); }
+    for (var i = 0; i < n; i++) {
+      var tr = document.createElement("tr");
+      var th = document.createElement("th");
+      th.setAttribute("scope", "row");
+      th.textContent = "T+" + String(i * SPACING).padStart(2, "0");
+      var tdVal = document.createElement("td");
+      tdVal.textContent = fmt(vals[i]);
+      var tdDelta = document.createElement("td");
+      if (i === 0) {
+        tdDelta.textContent = "—";
+      } else {
+        var d = vals[i] - vals[i - 1];
+        tdDelta.textContent = (d < 0 ? "−" : "+") + fmt(Math.abs(d));
+      }
+      tr.appendChild(th);
+      tr.appendChild(tdVal);
+      tr.appendChild(tdDelta);
+      el.rows.appendChild(tr);
+    }
+  }
+
+  function setMeter(cfg, value) {
+    var low = value < cfg.threshold;
+    cfg.valueEl.textContent = fmt(value);
+    cfg.fill.style.width = Math.max(0, Math.min(100, value)) + "%";
+    cfg.fill.className = "meter__fill " + (low ? "meter__fill--warn" : cfg.tone);
+    cfg.meter.setAttribute("aria-valuenow", String(value));
+    cfg.meter.setAttribute("aria-valuetext", fmt(value) + " percent, " +
+      (low ? "below the reserve threshold, watch" : "nominal"));
+    cfg.stateEl.textContent = low ? "Watch · below threshold" : "Nominal";
+    cfg.stateEl.className = "meterrow__state" + (low ? " meterrow__state--warn" : "");
+  }
+
+  function renderMeters() {
+    var s = SNAPS[state.snap];
+    setMeter({ valueEl: el.powerVal, fill: el.powerFill, meter: el.powerMeter, stateEl: el.powerState, threshold: 75, tone: "meter__fill--ok" }, s.power);
+    setMeter({ valueEl: el.o2Val, fill: el.o2Fill, meter: el.o2Meter, stateEl: el.o2State, threshold: 75, tone: "" }, s.o2);
+    el.powerNote.textContent = s.powerNote;
+    el.o2Note.textContent = s.o2Note;
+  }
+
+  function renderStatus() {
+    var s = SNAPS[state.snap];
+    el.stamp.textContent = s.stamp;
+    el.stamp.setAttribute("datetime", s.iso);
+    el.poll.textContent = s.clock;
+    el.channelsMeta.textContent = s.clock;
+    el.badge.textContent = "Snapshot " + (state.snap + 1) + " of " + SNAPS.length;
+
+    Array.prototype.forEach.call(el.pills, function (node) {
+      var kind = s.pills[node.getAttribute("data-pill")];
+      node.className = pillClass(kind) + (kind === "warn" ? " pill--sel" : "");
+      node.querySelector(".pill__state").textContent = pillWord(kind);
+    });
+
+    Array.prototype.forEach.call(el.chRows, function (row) {
+      var key = row.getAttribute("data-ch");
+      var info = s.rows[key];
+      row.setAttribute("aria-current", key === s.focus ? "true" : "false");
+      document.getElementById("ch-read-" + key).textContent = info[0];
+      var pill = row.querySelector("[data-chpill]");
+      pill.className = pillClass(info[1]);
+      while (pill.firstChild) { pill.removeChild(pill.firstChild); }
+      var glyph = document.createElement("span");
+      glyph.className = "pill__glyph";
+      glyph.setAttribute("aria-hidden", "true");
+      pill.appendChild(glyph);
+      pill.appendChild(document.createTextNode(pillWord(info[1])));
+    });
+  }
+
+  function applyFilter() {
+    var q = el.filter.value.trim().toLowerCase();
+    var rows = el.log.children, shown = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      var match = q === "" || row.textContent.toLowerCase().indexOf(q) !== -1;
+      row.hidden = !match;
+      if (match) { shown++; }
+    }
+    el.logEmpty.hidden = shown !== 0;
+    el.logCount.textContent = shown + (shown === 1 ? " entry" : " entries");
+  }
+
+  function appendEntry() {
+    var s = SNAPS[state.snap];
+    var li = document.createElement("li");
+    li.className = "log__row";
+    var stamp = document.createElement("time");
+    stamp.className = "log__time";
+    stamp.setAttribute("datetime", s.iso);
+    stamp.textContent = s.entryTime;
+    var src = document.createElement("span");
+    src.className = "log__src";
+    src.textContent = s.entrySrc;
+    var body = document.createElement("span");
+    body.className = "log__text";
+    body.textContent = s.entryText;
+    li.appendChild(stamp);
+    li.appendChild(src);
+    li.appendChild(body);
+    el.log.appendChild(li);
+    while (el.log.children.length > MAX_ROWS) { el.log.removeChild(el.log.firstElementChild); }
+    applyFilter();
+    if (el.follow.checked) { el.log.scrollTop = el.log.scrollHeight; }
+  }
+
+  document.getElementById("demo-action").addEventListener("click", function () {
+    state.snap = (state.snap + 1) % SNAPS.length;
+    var s = SNAPS[state.snap];
+    var current = windowValues();
+    renderStatus();
+    el.plot.classList.add("plot--fade");
+    renderChart();
+    window.requestAnimationFrame(function () { el.plot.classList.remove("plot--fade"); });
+    renderMeters();
+    appendEntry();
+    el.status.textContent = "Demo: snapshot " + (state.snap + 1) + " of " + SNAPS.length +
+      " loaded from local sample data. Structural load " + fmt(current[current.length - 1]) + " percent" +
+      (s.pills.tcs === "warn" ? ", thermal warning active." : ", all channels nominal.");
+  });
+
+  el.select.addEventListener("change", function () {
+    state.range = parseInt(el.select.value, 10);
+    renderChart();
+  });
+
+  el.filter.addEventListener("input", applyFilter);
+
+  el.follow.addEventListener("change", function () {
+    if (el.follow.checked) { el.log.scrollTop = el.log.scrollHeight; }
+  });
+
+  document.getElementById("pause-sweep").addEventListener("click", function (event) {
+    var button = event.currentTarget;
+    var paused = button.getAttribute("aria-pressed") === "true";
+    button.setAttribute("aria-pressed", paused ? "false" : "true");
+    button.textContent = paused ? "Pause sweep" : "Resume sweep";
+    el.sweep.style.animationPlayState = paused ? "running" : "paused";
+  });
+
+  document.getElementById("reset-view").addEventListener("click", function () {
+    el.select.value = "12";
+    state.range = 12;
+    el.filter.value = "";
+    el.follow.checked = true;
+    applyFilter();
+    renderChart();
+    el.log.scrollTop = el.log.scrollHeight;
+  });
+
+  renderChart();
+  applyFilter();
+})();
+</script>
+</body>
+</html>

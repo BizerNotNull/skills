@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview — Organic Botanical Wellness</title>
+<style>
+  :root{
+    --cream:#f4efe3;
+    --cream-deep:#e8e0cf;
+    --moss:#4a6136;
+    --moss-light:#7d9159;
+    --clay:#b4674a;         /* decorative fields only */
+    --clay-ink:#8f4f36;     /* text-safe clay (5.5:1) */
+    --ink:#33322a;
+    --ink-soft:#6a6553;
+    --blob-radius:42% 58% 62% 38% / 48% 42% 58% 52%;
+    --serif:"Iowan Old Style","Palatino Linotype",Georgia,"Book Antiqua","Times New Roman",serif;
+    --sans:ui-sans-serif,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --lift:0 12px 28px rgba(58,52,38,.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:17px;
+    line-height:1.7;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .shell{width:min(1140px,100% - 2.6rem);margin-inline:auto;}
+  a{color:var(--clay-ink);text-decoration-thickness:.06em;text-underline-offset:.2em;}
+  a:hover{color:var(--moss);}
+  :focus-visible{outline:3px solid var(--clay-ink);outline-offset:3px;}
+
+  /* ---------- header ---------- */
+  .topbar{padding:1rem 0;border-bottom:1px solid rgba(51,50,42,.12);}
+  .topbar .shell{display:flex;align-items:center;justify-content:space-between;gap:1.2rem;flex-wrap:wrap;}
+  .wordmark{
+    display:flex;align-items:center;gap:.6rem;text-decoration:none;color:var(--ink);
+    font-family:var(--sans);font-size:.78rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;
+  }
+  .wordmark svg{width:1.7rem;height:1.7rem;flex:none;}
+  nav.small{display:flex;gap:1.2rem;flex-wrap:wrap;font-family:var(--sans);font-size:.78rem;
+    letter-spacing:.12em;text-transform:uppercase;}
+  nav.small a{color:var(--ink-soft);text-decoration:none;}
+  nav.small a:hover{color:var(--moss);text-decoration:underline;}
+  .all-styles{
+    font-family:var(--sans);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--moss);color:var(--cream);text-decoration:none;
+    padding:.55rem 1rem;border-radius:999px;box-shadow:var(--lift);
+  }
+  .all-styles:hover{background:var(--clay-ink);color:var(--cream);}
+
+  /* ---------- hero ---------- */
+  .hero{padding:3.4rem 0 2.6rem;position:relative;}
+  .hero .grid{
+    display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+    gap:3rem;align-items:center;
+  }
+  .hero h1{
+    font-size:clamp(2.2rem,6.4vw,4.2rem);line-height:1.04;letter-spacing:-.02em;
+    margin:0 0 1.2rem;font-weight:400;
+  }
+  .hero h1 em{font-style:italic;color:var(--moss);}
+  .hero p{font-size:1.1rem;color:var(--ink-soft);max-width:44ch;margin:0 0 1.8rem;}
+  .hero .cta{display:flex;gap:.9rem;flex-wrap:wrap;align-items:center;}
+
+  .blobplate{
+    position:relative;min-width:0;
+  }
+  .blobplate .shape{
+    background:var(--moss-light);
+    background:linear-gradient(160deg,var(--moss-light),var(--moss));
+    border-radius:var(--blob-radius);
+    aspect-ratio:1/1;
+    display:grid;place-items:center;
+    box-shadow:var(--lift);
+  }
+  .blobplate .shape svg{width:78%;height:78%;animation:sway 9s ease-in-out infinite;}
+  @keyframes sway{
+    0%,100%{transform:rotate(-1.6deg) translateY(0)}
+    50%{transform:rotate(1.6deg) translateY(-8px)}
+  }
+  .blobplate .dot{
+    position:absolute;right:6%;bottom:4%;width:5.5rem;height:5.5rem;
+    background:var(--clay);border-radius:var(--blob-radius);
+    filter:saturate(.92);opacity:.92;
+  }
+
+  /* ---------- buttons / inputs ---------- */
+  .btn{
+    font-family:var(--sans);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;
+    padding:.85rem 1.5rem;border:0;border-radius:999px;background:var(--moss);color:var(--cream);
+    cursor:pointer;box-shadow:var(--lift);transition:transform .25s ease,background-color .25s ease;
+  }
+  .btn:hover{background:var(--clay-ink);transform:translateY(-2px);}
+  .btn:active{transform:translateY(0);}
+  .btn.ghost{background:transparent;color:var(--moss);border:2px solid var(--moss);box-shadow:none;}
+  .btn.ghost:hover{background:var(--moss);color:var(--cream);}
+
+  /* ---------- sections ---------- */
+  section.blk{padding:3.2rem 0;}
+  .kicker{
+    font-family:var(--sans);font-size:.72rem;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--clay-ink);margin:0 0 .7rem;display:block;
+  }
+  h2{
+    font-size:clamp(1.6rem,4vw,2.5rem);font-weight:400;line-height:1.15;letter-spacing:-.015em;
+    margin:0 0 1.6rem;max-width:34ch;
+  }
+
+  .card{
+    background:#fbf8f0;border-radius:2.4rem 1.5rem 2.8rem 1.7rem;
+    box-shadow:var(--lift);padding:1.7rem;min-width:0;
+  }
+
+  /* ---------- ritual (demo) ---------- */
+  .ritual{
+    display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:2.6rem;align-items:start;
+    background:var(--cream-deep);border-radius:3rem 1.6rem 3.4rem 1.8rem;padding:2.4rem;
+  }
+  .ritual h2{margin-bottom:.8rem;}
+  .ritual .note{color:var(--ink-soft);font-size:1rem;margin:0 0 1.6rem;max-width:42ch;}
+  .ritual .labels{display:flex;gap:.5rem;flex-wrap:wrap;list-style:none;margin:1.6rem 0 0;padding:0;
+    font-family:var(--sans);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);}
+  .ritual .labels li{border:1px dashed rgba(51,50,42,.3);border-radius:999px;padding:.25rem .7rem;}
+  .steps{list-style:none;margin:0;padding:0;display:grid;gap:1rem;}
+  .steps li{
+    display:grid;grid-template-columns:auto minmax(0,1fr);gap:1rem;align-items:start;
+    background:#fbf8f0;border-radius:1.8rem 1.2rem 2rem 1.4rem;padding:1.1rem 1.3rem;box-shadow:var(--lift);
+  }
+  .steps .num{
+    width:2.1rem;height:2.1rem;border-radius:var(--blob-radius);background:var(--moss);color:var(--cream);
+    font-family:var(--sans);font-size:.8rem;display:grid;place-items:center;flex:none;
+  }
+  .steps b{display:block;font-weight:400;font-size:1.06rem;line-height:1.35;}
+  .steps span{color:var(--ink-soft);font-size:.94rem;}
+
+  /* ---------- apothecary ---------- */
+  .shelf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.8rem;}
+  .shelf .card{display:flex;flex-direction:column;gap:.7rem;}
+  .shelf .card:nth-child(2){transform:translateY(1.6rem);}
+  .pot{
+    border-radius:var(--blob-radius);aspect-ratio:4/3;display:grid;place-items:center;
+    box-shadow:inset 0 0 0 1px rgba(51,50,42,.08);
+  }
+  .pot.moss{background:linear-gradient(150deg,#a9bb84,var(--moss-light));}
+  .pot.clay{background:linear-gradient(150deg,#d9a487,var(--clay));}
+  .pot.sage{background:linear-gradient(150deg,#cfd9bd,#9db07c);}
+  .pot svg{width:56%;height:56%;}
+  .shelf h3{margin:0;font-size:1.2rem;font-weight:400;}
+  .shelf .use{font-family:var(--sans);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:0;}
+  .shelf p.desc{margin:0;color:var(--ink-soft);font-size:.95rem;}
+  .shelf .price{
+    margin-top:auto;padding-top:.8rem;font-family:var(--sans);font-size:.82rem;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--clay-ink);
+  }
+
+  /* ---------- garden notes ---------- */
+  .notes{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:2.6rem;align-items:center;}
+  .notes .art{
+    border-radius:var(--blob-radius);background:#e2d9c4;aspect-ratio:1/1;display:grid;place-items:center;
+    box-shadow:var(--lift);
+  }
+  .notes .art svg{width:72%;height:72%;}
+  .quotes{list-style:none;margin:0;padding:0;display:grid;gap:1.4rem;}
+  .quotes li{background:#fbf8f0;border-radius:2rem 1.3rem 2.4rem 1.5rem;padding:1.3rem 1.5rem;
+    box-shadow:var(--lift);font-style:italic;color:var(--ink);}
+  .quotes cite{display:block;font-style:normal;font-family:var(--sans);font-size:.72rem;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:.6rem;}
+
+  /* ---------- components ---------- */
+  .comps{padding:3.4rem 0 4rem;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:1.8rem;}
+  .comp{grid-column:span 4;min-width:0;}
+  .comp h4{
+    font-family:var(--sans);font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--clay-ink);margin:0 0 1.1rem;
+  }
+  .stack{display:grid;gap:.9rem;}
+  .field label{font-family:var(--sans);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-soft);display:block;margin-bottom:.45rem;}
+  .field input{
+    font-family:var(--serif);font-size:1rem;color:var(--ink);width:100%;
+    padding:.85rem 1.1rem;border:1px solid rgba(51,50,42,.2);border-radius:1.4rem .9rem 1.6rem 1rem;
+    background:#fbf8f0;box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .field input::placeholder{color:#9a9384;}
+  .msg{font-size:.92rem;color:var(--clay-ink);margin:.55rem 0 0;min-height:1.3em;}
+
+  footer.colophon{
+    border-top:1px solid rgba(51,50,42,.12);padding:2.2rem 0 3.2rem;
+    display:flex;justify-content:space-between;gap:1.2rem;flex-wrap:wrap;
+    font-family:var(--sans);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);
+  }
+
+  @media (max-width:900px){
+    .hero .grid,.ritual,.notes{grid-template-columns:1fr;gap:2rem;}
+    .blobplate{max-width:26rem;}
+    .shelf{grid-template-columns:1fr;}
+    .shelf .card:nth-child(2){transform:none;}
+    .comp{grid-column:1 / -1;}
+    section.blk{padding:2.4rem 0;}
+  }
+  @media (max-width:520px){
+    body{font-size:16px;}
+    .ritual{padding:1.5rem;border-radius:2rem 1.1rem 2.2rem 1.2rem;}
+    .blobplate .dot{width:3.6rem;height:3.6rem;}
+    .btn{width:100%;text-align:center;}
+    .hero .cta{gap:.7rem;}
+    .steps li{padding:.95rem 1rem;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important;scroll-behavior:auto!important;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="shell">
+    <a class="wordmark" href="#top">
+      <svg viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 36V16" stroke="#4a6136" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M20 20C20 10 26 4 34 4c0 10-6 16-14 16z" fill="#7d9159"/>
+        <path d="M20 26C20 18 14 12 6 12c0 8 6 14 14 14z" fill="#b4674a" opacity=".85"/>
+      </svg>
+      Fern &amp; Clay
+    </a>
+    <nav class="small" aria-label="Site">
+      <a href="#rituals">Rituals</a>
+      <a href="#apothecary">Apothecary</a>
+      <a href="#garden">Garden</a>
+    </nav>
+    <a class="all-styles" href="index.html">&larr; All styles</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero shell" aria-labelledby="hero-h">
+    <div class="grid">
+      <div>
+        <span class="kicker">Garden apothecary &middot; since 2016</span>
+        <h1 id="hero-h">Slow care for <em>tired ground</em></h1>
+        <p>We grow, dry and blend everything on a half-acre plot outside the city. Balms, steams and
+          tinctures in small batches, made on the mornings we can smell the soil warming.</p>
+        <div data-demo-scope>
+          <div class="cta">
+            <button class="btn" type="button" data-demo="no basket is opened and no order is placed">Shop the shelf</button>
+            <button class="btn ghost" type="button" data-demo="no map, address or booking is loaded">Visit the plot</button>
+          </div>
+          <p class="msg" data-demo-msg role="status" aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="blobplate">
+        <div class="shape">
+          <svg viewBox="0 0 200 200" role="img" aria-label="Illustration of a sprig of fern leaves with a clay-coloured seed pod.">
+            <path d="M100 178V92" stroke="#f4efe3" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+            <g fill="#f4efe3">
+              <path d="M100 118c-4-16-16-26-34-28 6 16 18 26 34 28z"/>
+              <path d="M100 118c4-16 16-26 34-28-6 16-18 26-34 28z"/>
+              <path d="M100 96c-4-16-16-26-34-28 6 16 18 26 34 28z"/>
+              <path d="M100 96c4-16 16-26 34-28-6 16-18 26-34 28z"/>
+              <path d="M100 74c-4-14-14-22-29-24 5 14 15 22 29 24z"/>
+              <path d="M100 74c4-14 14-22 29-24-5 14-15 22-29 24z"/>
+            </g>
+            <circle cx="100" cy="60" r="9" fill="#b4674a"/>
+          </svg>
+        </div>
+        <span class="dot" aria-hidden="true"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell blk" id="rituals" aria-labelledby="ritual-h">
+    <div class="ritual">
+      <div>
+        <span class="kicker">Demo &middot; ritual planner</span>
+        <h2 id="ritual-h">Three rituals, one small shelf</h2>
+        <p class="note" id="demo-status" role="status" aria-live="polite">Showing the morning ritual:
+          three steps for waking skin. Cycling the planner swaps the steps below &mdash; a local
+          demo, nothing is saved and no order is placed.</p>
+        <button class="btn" id="demo-action" type="button">Next ritual</button>
+        <ul class="labels" aria-hidden="true">
+          <li>morning</li>
+          <li>evening</li>
+          <li>weekly</li>
+        </ul>
+      </div>
+      <ol class="steps" id="step-list">
+        <li>
+          <span class="num">1</span>
+          <span><b>Rosehip steam, two minutes</b><span>Pour over dried petals, breathe through a linen cloth.</span></span>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <span><b>Clay cleanser, lukewarm water</b><span>Massage in circles, rinse until the porcelain runs clear.</span></span>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <span><b>Nettle facial balm</b><span>Warm three drops between the palms, press &mdash; never rub.</span></span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="shell blk" id="apothecary" aria-labelledby="apo-h">
+    <span class="kicker">The apothecary</span>
+    <h2 id="apo-h">Blended on the mornings we can smell the soil</h2>
+    <div class="shelf">
+      <article class="card">
+        <div class="pot moss" aria-hidden="true">
+          <svg viewBox="0 0 60 60"><path d="M30 54V26" stroke="#f4efe3" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M30 34C30 22 37 15 48 15c0 12-7 19-18 19z" fill="#f4efe3"/><path d="M30 42C30 32 23 25 12 25c0 10 7 17 18 17z" fill="#f4efe3" opacity=".8"/></svg>
+        </div>
+        <h3>Nettle &amp; Oat Balm</h3>
+        <p class="use">Evening &middot; 60 ml</p>
+        <p class="desc">Barrier balm for windburned skin. Unscented, thick as cold butter.</p>
+        <p class="price">&pound;26</p>
+      </article>
+      <article class="card">
+        <div class="pot clay" aria-hidden="true">
+          <svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="12" fill="#f4efe3"/><path d="M30 6v8M30 46v8M6 30h8M46 30h8M13 13l6 6M41 41l6 6M47 13l-6 6M19 41l-6 6" stroke="#f4efe3" stroke-width="2.6" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Rosehip Steam Blend</h3>
+        <p class="use">Morning &middot; 120 g</p>
+        <p class="desc">Petals, hips and a little rosemary. Two minutes over a bowl is enough.</p>
+        <p class="price">&pound;18</p>
+      </article>
+      <article class="card">
+        <div class="pot sage" aria-hidden="true">
+          <svg viewBox="0 0 60 60"><path d="M18 50c0-16 6-28 24-38 0 18-8 30-24 38z" fill="#f4efe3"/><path d="M18 50c10-10 16-20 20-32" stroke="#4a6136" stroke-width="2" fill="none"/></svg>
+        </div>
+        <h3>Clay Cleansing Grains</h3>
+        <p class="use">Weekly &middot; 90 g</p>
+        <p class="desc">Kaolin, ground oats and chamomile. Mix with water, not with enthusiasm.</p>
+        <p class="price">&pound;22</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="shell blk" id="garden" aria-labelledby="garden-h">
+    <div class="notes">
+      <div class="art" aria-hidden="true">
+        <svg viewBox="0 0 200 200">
+          <path d="M20 150c30-40 60-60 100-66" stroke="#7d9159" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M60 118c-14-2-24-10-28-24 14 0 24 8 28 24z" fill="#7d9159"/>
+          <path d="M92 96c-14-2-24-10-28-24 14 0 24 8 28 24z" fill="#4a6136"/>
+          <path d="M126 76c-14-2-24-10-28-24 14 0 24 8 28 24z" fill="#7d9159"/>
+          <path d="M96 148c12 8 26 10 42 6-8 12-24 16-42 2z" fill="#b4674a" opacity=".9"/>
+          <path d="M20 168h160" stroke="#33322a" stroke-width="2" opacity=".25"/>
+        </svg>
+      </div>
+      <div>
+        <span class="kicker">From the garden notebook</span>
+        <h2 id="garden-h">What the plot taught us this season</h2>
+        <ul class="quotes">
+          <li>
+            &ldquo;Nettles grow exactly where the ground has been disturbed. We stopped fighting
+            that and started harvesting it.&rdquo;
+            <cite>&mdash; planting notes, April</cite>
+          </li>
+          <li>
+            &ldquo;A balm that separates in the jar is telling you the truth about beeswax
+            ratios.&rdquo;
+            <cite>&mdash; blending notes, June</cite>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="comps shell" aria-label="Component specimens">
+    <div class="comp card">
+      <h4>Buttons</h4>
+      <div class="stack" data-demo-scope>
+        <button class="btn" type="button" data-demo="no item is added and no basket is created">Add to basket</button>
+        <button class="btn ghost" type="button" data-demo="no journal or gallery is loaded">Read the notes</button>
+        <p class="desc" style="margin:0;color:var(--ink-soft);font-size:.94rem">
+          Basket and checkout are out of scope in this specimen: pressing either button reports what
+          it does <em>not</em> do, in the status line below.
+        </p>
+        <p class="msg" data-demo-msg role="status" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="comp card">
+      <h4>Newsletter</h4>
+      <form class="field" id="news" novalidate>
+        <label for="news-email">Email for seasonal letters</label>
+        <input id="news-email" name="email" type="email" autocomplete="email" placeholder="you@example.com">
+        <button class="btn" type="submit" style="justify-self:start">Subscribe</button>
+        <p class="msg" id="news-msg" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+
+    <div class="comp card">
+      <h4>Care notes</h4>
+      <div class="stack">
+        <div>
+          <p class="use">Harvest</p>
+          <p class="desc">Twice weekly, early, before the bees are fully awake.</p>
+        </div>
+        <div>
+          <p class="use">Drying</p>
+          <p class="desc">Linen trays in the loft for nine days; no heat, no fans.</p>
+        </div>
+        <div>
+          <p class="use">Batch size</p>
+          <p class="desc">Forty jars. When they are gone, we wait for the next plant.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="colophon shell">
+  <span>Fern &amp; Clay &mdash; botanical specimen</span>
+  <span><a href="index.html" class="all-styles" style="padding:.45rem .9rem">&larr; All styles</a></span>
+</footer>
+
+<script>
+(function(){
+  var rituals = [
+    {
+      name:"morning ritual",
+      note:"three steps for waking skin",
+      steps:[
+        ["Rosehip steam, two minutes","Pour over dried petals, breathe through a linen cloth."],
+        ["Clay cleanser, lukewarm water","Massage in circles, rinse until the porcelain runs clear."],
+        ["Nettle facial balm","Warm three drops between the palms, press \u2014 never rub."]
+      ]
+    },
+    {
+      name:"evening ritual",
+      note:"two slow steps before bed",
+      steps:[
+        ["Warm oil, pressed on","Chamomile and oat oil on damp skin; let it sit while the kettle boils."],
+        ["Balm on hands and heels","A thick layer, cotton gloves, lights out before eleven."]
+      ]
+    },
+    {
+      name:"weekly ritual",
+      note:"four steps, Sunday morning",
+      steps:[
+        ["Dry brush, upward","Long strokes toward the heart; stop at the collarbone."],
+        ["Clay grains mask","Ten minutes only \u2014 the clay keeps working after you stop enjoying it."],
+        ["Steam over the pot","Five minutes, cloth over the head, eyes closed."],
+        ["Sage water rinse","Cool, poured slowly, then a balm while the skin is still damp."]
+      ]
+    }
+  ];
+
+  var i = 0;
+  var btn = document.getElementById("demo-action");
+  var status = document.getElementById("demo-status");
+  var list = document.getElementById("step-list");
+  var labels = Array.prototype.slice.call(document.querySelectorAll(".ritual .labels li"));
+
+  function render(idx){
+    var r = rituals[idx];
+    list.innerHTML = "";
+    r.steps.forEach(function(s, n){
+      var li = document.createElement("li");
+      var num = document.createElement("span");
+      num.className = "num";
+      num.textContent = String(n + 1);
+      var wrap = document.createElement("span");
+      var b = document.createElement("b");
+      b.textContent = s[0];
+      var d = document.createElement("span");
+      d.textContent = s[1];
+      wrap.appendChild(b);
+      wrap.appendChild(d);
+      li.appendChild(num);
+      li.appendChild(wrap);
+      list.appendChild(li);
+    });
+    labels.forEach(function(el, n){ el.style.opacity = n === idx ? "1" : ".45"; });
+    status.textContent = "Showing the " + r.name + ": " + r.note +
+      ". Demo only: cycling this planner rewrites the list from local data \u2014 nothing is saved and no order is placed.";
+  }
+
+  btn.addEventListener("click", function(){
+    i = (i + 1) % rituals.length;
+    render(i);
+  });
+
+  /* Specimen controls: every auxiliary button reports honestly into its group's live region. */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-demo]"), function(b){
+    b.addEventListener("click", function(){
+      var scope = b.closest("[data-demo-scope]") || document;
+      var slot = scope.querySelector("[data-demo-msg]");
+      if(!slot){ return; }
+      slot.textContent = "Demo only \u2014 \u201c" + b.textContent.trim() + "\u201d: " +
+        b.getAttribute("data-demo") + ". This is a specimen control; nothing is saved or sent.";
+    });
+  });
+
+  document.getElementById("news").addEventListener("submit", function(e){
+    e.preventDefault();
+    var v = document.getElementById("news-email").value.trim();
+    document.getElementById("news-msg").textContent = v
+      ? "Demo only \u2014 this specimen sends nothing and stores nothing."
+      : "Demo only \u2014 enter any address to see the message state.";
+  });
+
+  render(0);
+  labels.forEach(function(el, n){ el.style.opacity = n === 0 ? "1" : ".45"; });
+})();
+</script>
+</body>
+</html>

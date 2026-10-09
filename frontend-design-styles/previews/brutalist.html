@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview — Brutalist Creative Studio</title>
+<style>
+  :root{
+    --bone:#f3f1e4;
+    --black:#0b0b0b;
+    --acid:#e8ff00;
+    --purple:#7b2ff7;
+    --accent:var(--acid);
+    --accent-ink:var(--black);
+    --outline:3px solid var(--black);
+    --shadow:10px 10px 0 var(--black);
+    --heavy:"Arial Black","Helvetica Neue",Impact,system-ui,"Segoe UI",sans-serif;
+    --mono:ui-monospace,"Cascadia Mono",Consolas,"Courier New",monospace;
+  }
+  html[data-accent="purple"]{
+    --accent:var(--purple);
+    --accent-ink:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--bone);
+    color:var(--black);
+    font-family:var(--mono);
+    font-size:16px;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  .shell{width:min(1180px,100% - 2rem);margin-inline:auto;}
+  a{color:inherit;}
+  :focus-visible{outline:4px dashed var(--purple);outline-offset:3px;}
+  html[data-accent="purple"] :focus-visible{outline-color:var(--black);}
+
+  .slab{border:var(--outline);background:var(--bone);box-shadow:var(--shadow);}
+  .pad{padding:1.6rem;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    border-bottom:var(--outline);background:var(--bone);
+    position:relative;z-index:3;
+  }
+  .topbar .shell{
+    display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    padding:.7rem 0;
+  }
+  .brand{
+    font-family:var(--heavy);font-size:1.35rem;letter-spacing:-.03em;
+    text-decoration:none;text-transform:uppercase;
+  }
+  .brand span{background:var(--accent);padding:.05em .18em;border:2px solid var(--black);}
+  nav.menu{display:flex;gap:.9rem;flex-wrap:wrap;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;}
+  nav.menu a{text-decoration:none;border-bottom:3px solid transparent;}
+  nav.menu a:hover{border-bottom-color:var(--purple);}
+  .all-styles{
+    display:inline-block;text-decoration:none;border:var(--outline);background:var(--accent);color:var(--accent-ink);
+    padding:.35rem .6rem;font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;font-weight:700;
+    box-shadow:4px 4px 0 var(--black);
+  }
+  .all-styles:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--black);}
+  .all-styles:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--black);}
+
+  /* ---------- hero ---------- */
+  .hero{padding:2.4rem 0 0;}
+  .hero .slab{background:var(--accent);color:var(--accent-ink);}
+  h1{
+    font-family:var(--heavy);
+    font-size:clamp(2.9rem,11.5vw,8.6rem);
+    line-height:.85;letter-spacing:-.045em;text-transform:uppercase;
+    margin:0 0 .4rem;
+  }
+  h1 .strike{
+    display:inline-block;background:var(--bone);color:var(--black);
+    border:var(--outline);padding:0 .1em;transform:rotate(-1.2deg);
+  }
+  .hero .lede{
+    font-size:clamp(1rem,2vw,1.35rem);max-width:46ch;margin:1rem 0 1.4rem;
+    font-family:var(--mono);text-transform:uppercase;letter-spacing:.01em;line-height:1.35;
+  }
+  .hero .actions{display:flex;gap:.9rem;flex-wrap:wrap;align-items:center;}
+  .stickers{display:flex;gap:.8rem;flex-wrap:wrap;padding:1.4rem 0 0;list-style:none;margin:0;}
+  .stickers li{
+    font-family:var(--heavy);font-size:.85rem;text-transform:uppercase;letter-spacing:-.01em;
+    border:var(--outline);background:var(--bone);padding:.4rem .7rem;box-shadow:5px 5px 0 var(--black);
+  }
+  .stickers li:nth-child(odd){transform:rotate(-2.4deg);}
+  .stickers li:nth-child(even){transform:rotate(1.8deg);background:var(--purple);color:#fff;}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    font-family:var(--heavy);font-size:.9rem;text-transform:uppercase;letter-spacing:.02em;
+    padding:.85rem 1.3rem;border:var(--outline);background:var(--bone);color:var(--black);
+    cursor:pointer;box-shadow:7px 7px 0 var(--black);
+    transition:transform .09s steps(2,end),box-shadow .09s steps(2,end);
+  }
+  .btn:hover{transform:translate(-3px,-3px);box-shadow:10px 10px 0 var(--black);}
+  .btn:active{transform:translate(7px,7px);box-shadow:0 0 0 var(--black);}
+  .btn.fill{background:var(--black);color:var(--bone);}
+  .btn.accent{background:var(--accent);color:var(--accent-ink);}
+
+  /* ---------- ticker ---------- */
+  .ticker{
+    margin-top:2.4rem;border-top:var(--outline);border-bottom:var(--outline);
+    background:var(--black);color:var(--bone);overflow:hidden;
+  }
+  .ticker .track{
+    display:flex;gap:2.5rem;white-space:nowrap;padding:.7rem 0;
+    font-family:var(--heavy);text-transform:uppercase;font-size:1.05rem;letter-spacing:.02em;
+    animation:slide 22s linear infinite;width:max-content;
+  }
+  .ticker b{color:var(--acid);}
+  @keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* ---------- stats ---------- */
+  .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.4rem;padding:2.6rem 0;}
+  .stat{min-width:0;}
+  .stat .n{
+    font-family:var(--heavy);font-size:clamp(2.6rem,8vw,5.4rem);line-height:.85;letter-spacing:-.05em;
+    display:block;
+  }
+  .stat .l{font-size:.82rem;text-transform:uppercase;letter-spacing:.14em;margin-top:.4rem;display:block;}
+
+  /* ---------- services ---------- */
+  .services{padding:0 0 2.6rem;display:grid;gap:1.2rem;}
+  .row{
+    display:grid;grid-template-columns:5rem minmax(0,1fr) auto;gap:1.2rem;align-items:center;
+    border:var(--outline);background:var(--bone);padding:1.1rem 1.2rem;box-shadow:6px 6px 0 var(--black);
+  }
+  .row .idx{
+    font-family:var(--heavy);font-size:1.9rem;line-height:1;background:var(--accent);color:var(--accent-ink);
+    border:2px solid var(--black);text-align:center;padding:.2rem 0;
+  }
+  .row h3{margin:0;font-family:var(--heavy);font-size:clamp(1.1rem,3vw,1.7rem);text-transform:uppercase;letter-spacing:-.02em;}
+  .row p{margin:.3rem 0 0;font-size:.86rem;max-width:52ch;}
+  .row .price{font-family:var(--heavy);font-size:1.1rem;white-space:nowrap;}
+
+  /* ---------- work cards ---------- */
+  .workhead{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    border-bottom:var(--outline);padding-bottom:.6rem;margin-bottom:1.6rem;
+  }
+  .workhead h2{
+    font-family:var(--heavy);font-size:clamp(1.8rem,6vw,3.4rem);text-transform:uppercase;
+    letter-spacing:-.04em;margin:0;line-height:.9;
+  }
+  .workhead p{margin:0;font-size:.82rem;text-transform:uppercase;letter-spacing:.12em;}
+  .work{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.4rem;padding-bottom:2.6rem;}
+  .card{
+    border:var(--outline);background:var(--bone);box-shadow:var(--shadow);min-width:0;
+    display:flex;flex-direction:column;
+  }
+  .card .thumb{border-bottom:var(--outline);height:9rem;display:grid;place-items:center;background:var(--accent);}
+  .card:nth-child(2) .thumb{background:repeating-linear-gradient(45deg,var(--purple) 0 12px,#000 12px 24px);}
+  .card:nth-child(3) .thumb{background:repeating-linear-gradient(0deg,var(--black) 0 6px,var(--acid) 6px 18px);}
+  .card .thumb svg{width:100%;height:100%;display:block;}
+  .card .body{padding:1.1rem 1.2rem;display:flex;flex-direction:column;gap:.5rem;flex:1;}
+  .card h3{margin:0;font-family:var(--heavy);font-size:1.2rem;text-transform:uppercase;letter-spacing:-.02em;}
+  .card p{margin:0;font-size:.85rem;}
+  .card .tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:auto;padding-top:.6rem;list-style:none;padding-left:0;}
+  .card .tags li{border:2px solid var(--black);padding:.1rem .4rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;}
+
+  /* ---------- quote ---------- */
+  .quote{
+    border:var(--outline);background:var(--black);color:var(--bone);padding:2rem 1.6rem;margin-bottom:2.6rem;
+    box-shadow:12px 12px 0 var(--purple);
+  }
+  .quote blockquote{margin:0;}
+  .quote p{
+    font-family:var(--heavy);font-size:clamp(1.4rem,4.6vw,2.8rem);line-height:1;letter-spacing:-.03em;
+    text-transform:uppercase;margin:0 0 1rem;
+  }
+  .quote p b{color:var(--acid);}
+  .quote cite{font-style:normal;font-size:.82rem;text-transform:uppercase;letter-spacing:.16em;}
+
+  /* ---------- demo strip ---------- */
+  .demo{border-top:var(--outline);border-bottom:var(--outline);background:var(--accent);color:var(--accent-ink);}
+  .demo .shell{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1.2rem 2rem;align-items:center;padding:1.3rem 0;}
+  .demo .label{font-family:var(--heavy);font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;margin:0 0 .35rem;}
+  .demo p{margin:0;font-size:.86rem;max-width:56ch;}
+  button#demo-action{
+    font-family:var(--heavy);font-size:.95rem;text-transform:uppercase;
+    padding:1rem 1.4rem;border:var(--outline);background:var(--bone);color:var(--black);
+    cursor:pointer;box-shadow:8px 8px 0 var(--black);min-width:15rem;
+  }
+  button#demo-action:hover{transform:translate(-3px,-3px);box-shadow:11px 11px 0 var(--black);}
+  button#demo-action:active{transform:translate(8px,8px);box-shadow:0 0 0 var(--black);}
+
+  /* ---------- components ---------- */
+  .comps{padding:2.8rem 0 3rem;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:1.6rem;}
+  .comp{grid-column:span 4;min-width:0;border:var(--outline);background:var(--bone);padding:1.2rem;box-shadow:6px 6px 0 var(--black);}
+  .comp h3{
+    font-family:var(--heavy);font-size:1rem;text-transform:uppercase;letter-spacing:.02em;
+    margin:0 0 1rem;background:var(--purple);color:#fff;display:inline-block;padding:.2rem .5rem;
+    border:2px solid var(--black);transform:rotate(-1deg);
+  }
+  .stack{display:grid;gap:.8rem;}
+  .btns{display:flex;gap:.8rem;flex-wrap:wrap;}
+  .field label{font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;font-weight:700;display:block;margin-bottom:.4rem;}
+  .field input{
+    font-family:var(--mono);font-size:.95rem;padding:.75rem;border:var(--outline);
+    background:var(--bone);color:var(--black);width:100%;
+  }
+  .field input::placeholder{color:#6b6b5f;}
+  .msg{font-size:.8rem;margin:.6rem 0 0;min-height:1.2em;}
+  .list{list-style:none;margin:0;padding:0;}
+  .list li{
+    display:flex;justify-content:space-between;gap:1rem;padding:.45rem 0;border-bottom:2px dashed var(--black);
+    font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;
+  }
+
+  footer.foot{
+    border-top:var(--outline);padding:1.4rem 0 2.6rem;
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;
+  }
+
+  @media (max-width:900px){
+    .stats{grid-template-columns:1fr;}
+    .work{grid-template-columns:1fr;}
+    .row{grid-template-columns:3.4rem minmax(0,1fr);}
+    .row .price{grid-column:2;}
+    .comp{grid-column:1 / -1;}
+  }
+  @media (max-width:560px){
+    h1{font-size:clamp(2.4rem,14vw,4.2rem);}
+    .demo .shell{grid-template-columns:1fr;}
+    button#demo-action{min-width:0;width:100%;}
+    .hero .slab.pad{padding:1.1rem;}
+    .stickers li{font-size:.75rem;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important;scroll-behavior:auto!important;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="shell">
+    <a class="brand" href="#top"><span>Raw</span>form&reg;</a>
+    <nav class="menu" aria-label="Site">
+      <a href="#work">Work</a>
+      <a href="#services">Studio</a>
+      <a href="#comps">Shop</a>
+      <a href="#demo-heading">Contact</a>
+    </nav>
+    <a class="all-styles" href="index.html">&larr; All styles</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero shell" aria-labelledby="hero-h">
+    <div class="slab pad">
+      <h1 id="hero-h">We make <span class="strike">loud</span> things</h1>
+      <p class="lede">Brand identity, packaging and websites for people who are allergic to beige.
+        No stock photos. No gradients. No 12-column grid we did not build ourselves.</p>
+      <div data-demo-scope>
+        <div class="actions">
+          <button class="btn fill" type="button" data-demo="no project is started, no brief is sent">Start a project</button>
+          <button class="btn" type="button" data-demo="the work index is not filtered or loaded">See the work</button>
+        </div>
+        <p class="msg" data-demo-msg role="status" aria-live="polite"></p>
+      </div>
+    </div>
+    <ul class="stickers">
+      <li>Est. 2019</li>
+      <li>No meetings before 10</li>
+      <li>Bristol + Rotterdam</li>
+      <li>6 humans, 2 dogs</li>
+    </ul>
+  </section>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="track">
+      <span>&#9733; <b>No beige</b> &#9733; No stock photos &#9733; No lorem ipsum &#9733; No drip-feed roadmap &#9733; No retainers unless you ask &#9733;</span>
+      <span>&#9733; <b>No beige</b> &#9733; No stock photos &#9733; No lorem ipsum &#9733; No drip-feed roadmap &#9733; No retainers unless you ask &#9733;</span>
+    </div>
+  </div>
+
+  <section class="stats shell" aria-label="Studio in numbers">
+    <div class="stat"><span class="n">48</span><span class="l">Projects shipped</span></div>
+    <div class="stat"><span class="n">07</span><span class="l">Awards on the shelf</span></div>
+    <div class="stat"><span class="n">&#8734;</span><span class="l">Revisions until it is right</span></div>
+  </section>
+
+  <section class="services shell" id="services" aria-labelledby="services-h">
+    <h2 id="services-h" class="sr-only" style="position:absolute;left:-9999px">Services</h2>
+    <div class="row">
+      <span class="idx" aria-hidden="true">01</span>
+      <div>
+        <h3>Identity &amp; Wordmark</h3>
+        <p>Naming, lettering, print system. Delivered as outlines, specs and a wall of stickers.</p>
+      </div>
+      <span class="price">from &pound;9k</span>
+    </div>
+    <div class="row">
+      <span class="idx" aria-hidden="true">02</span>
+      <div>
+        <h3>Packaging that shouts</h3>
+        <p>Structural design, two-colour print, nothing you have to squint at on a shelf.</p>
+      </div>
+      <span class="price">from &pound;14k</span>
+    </div>
+    <div class="row">
+      <span class="idx" aria-hidden="true">03</span>
+      <div>
+        <h3>Websites with edges</h3>
+        <p>Front-end build, no cookie-cut template, no carousel, no exit-intent popup. Ever.</p>
+      </div>
+      <span class="price">from &pound;18k</span>
+    </div>
+  </section>
+
+  <section class="shell" id="work" aria-labelledby="work-h">
+    <div class="workhead">
+      <h2 id="work-h">Selected work</h2>
+      <p>2019 &rarr; now</p>
+    </div>
+    <div class="work">
+      <article class="card">
+        <div class="thumb" aria-hidden="true">
+          <svg viewBox="0 0 300 150"><g fill="none" stroke="#0b0b0b" stroke-width="6">
+            <path d="M20 120 L90 40 L150 120 L210 40 L280 120"/></g></svg>
+        </div>
+        <div class="body">
+          <h3>Halt Brewing</h3>
+          <p>Can system for a brewery that refused to use a single round shape.</p>
+          <ul class="tags"><li>Packaging</li><li>Type</li></ul>
+        </div>
+      </article>
+      <article class="card">
+        <div class="thumb" aria-hidden="true"></div>
+        <div class="body">
+          <h3>Third Rail Records</h3>
+          <p>Sleeves, a website, and a shop that loads in under a second on 3G.</p>
+          <ul class="tags"><li>Identity</li><li>Web</li></ul>
+        </div>
+      </article>
+      <article class="card">
+        <div class="thumb" aria-hidden="true"></div>
+        <div class="body">
+          <h3>Municipal Fitness</h3>
+          <p>A gym brand with council funding and a poster campaign at bus stops.</p>
+          <ul class="tags"><li>Campaign</li><li>Print</li></ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="shell">
+    <div class="quote">
+      <blockquote>
+        <p>&ldquo;They sent back the brief with <b>three corrections</b> and made us better clients.&rdquo;</p>
+        <cite>&mdash; Priya Raman, Halt Brewing</cite>
+      </blockquote>
+    </div>
+  </section>
+
+  <section class="demo" aria-labelledby="demo-heading">
+    <div class="shell">
+      <div>
+        <p class="label" id="demo-heading">Demo &middot; accent switch</p>
+        <p id="demo-status" role="status" aria-live="polite">Accent: acid yellow. This button swaps the studio accent
+          colour across the page &mdash; a local theme state, no request is made and nothing is saved.</p>
+      </div>
+      <button id="demo-action" type="button">Switch to purple</button>
+    </div>
+  </section>
+
+  <section class="comps shell" id="comps" aria-label="Component specimens">
+    <div class="comp" data-demo-scope>
+      <h3>Buttons</h3>
+      <div class="btns">
+        <button class="btn accent" type="button" data-demo="no call is scheduled">Book a call</button>
+        <button class="btn" type="button" data-demo="no file is downloaded">Download deck</button>
+      </div>
+      <p class="msg" data-demo-msg role="status" aria-live="polite"></p>
+      <p style="font-size:.82rem;margin:1rem 0 0">Hover lifts by 3px, press drops by 7px. The shadow does not blur &mdash;
+        it snaps.</p>
+    </div>
+
+    <div class="comp">
+      <h3>Enquiry form</h3>
+      <form class="field" id="enquiry" novalidate>
+        <label for="enq-email">Your email</label>
+        <input id="enq-email" name="email" type="email" autocomplete="email" placeholder="you@studio.com">
+        <p class="msg" id="enq-msg" role="status" aria-live="polite"></p>
+        <div class="btns" style="margin-top:.8rem">
+          <button class="btn fill" type="submit">Send it</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="comp">
+      <h3>Studio facts</h3>
+      <ul class="list">
+        <li><span>Founded</span><span>2019</span></li>
+        <li><span>Budget floor</span><span>&pound;9k</span></li>
+        <li><span>Next opening</span><span>Q1</span></li>
+        <li><span>Coffee</span><span>Filter only</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot shell">
+  <span>Rawform&reg; &mdash; brutalist specimen</span>
+  <a class="all-styles" href="index.html">&larr; All styles</a>
+</footer>
+
+<script>
+(function(){
+  var btn = document.getElementById("demo-action");
+  var status = document.getElementById("demo-status");
+  var root = document.documentElement;
+  var purple = false;
+  btn.addEventListener("click", function(){
+    purple = !purple;
+    if(purple){ root.setAttribute("data-accent","purple"); }
+    else { root.removeAttribute("data-accent"); }
+    btn.textContent = purple ? "Switch to acid yellow" : "Switch to purple";
+    status.textContent = "Accent: " + (purple ? "purple" : "acid yellow") +
+      ". The hero, ticks and every accent chip repaint from CSS custom properties. Demo only: a local theme state, nothing is requested or stored.";
+  });
+
+  /* Specimen controls: every auxiliary button reports honestly into its group's live region. */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-demo]"), function(b){
+    b.addEventListener("click", function(){
+      var scope = b.closest("[data-demo-scope]") || document;
+      var slot = scope.querySelector("[data-demo-msg]");
+      if(!slot){ return; }
+      slot.textContent = "Demo only \u2014 \u201c" + b.textContent.trim() + "\u201d: " +
+        b.getAttribute("data-demo") + ". Specimen control: it shows its own states and nothing else.";
+    });
+  });
+
+  document.getElementById("enquiry").addEventListener("submit", function(e){
+    e.preventDefault();
+    var v = document.getElementById("enq-email").value.trim();
+    document.getElementById("enq-msg").textContent = v
+      ? "Demo only \u2014 this form posts nowhere and stores nothing."
+      : "Demo only \u2014 type anything to see the confirmation state.";
+  });
+})();
+</script>
+</body>
+</html>

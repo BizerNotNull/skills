@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halo Focus — aurora glass soundscape player</title>
+<style>
+  :root{
+    --aurora-violet:#7C5CFF;
+    --aurora-violet-deep:#5B3FE0;
+    --aurora-violet-hover:#6B50EE;
+    --aurora-violet-active:#4B31C4;
+    --aurora-indigo:#3B2E8F;
+    --aurora-teal:#3FD8C8;
+    --fg:#F4F3FF;
+    --fg-muted:#B9B4E6;
+    --focus:#9FE9DF;
+    --page:#0B0920;
+    --panel-a:#181536;
+    --panel-b:#12102A;
+    --surface-glass:rgba(255,255,255,0.07);
+    --hairline:rgba(255,255,255,0.16);
+    --glass-1:rgba(255,255,255,0.045);
+    --glass-2:rgba(255,255,255,0.070);
+    --glass-3:rgba(255,255,255,0.095);
+    --blur:blur(22px) saturate(140%);
+    --shadow-3:0 24px 60px -22px rgba(8,4,36,0.8);
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+    --ease:cubic-bezier(0.2,0.8,0.25,1);
+    --font-ui:"Segoe UI Variable Display","Segoe UI",-apple-system,BlinkMacSystemFont,"SF Pro Display",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --font-num:ui-monospace,"SF Mono","Cascadia Mono","Segoe UI Mono",Consolas,Menlo,monospace;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0;
+    min-height:100vh;
+    overflow-x:clip;
+    background:var(--page);
+    color:var(--fg);
+    font-family:var(--font-ui);
+    font-size:15px;
+    line-height:1.6;
+  }
+
+  /* ---------- aurora field ---------- */
+  .aurora{ position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; transition:opacity .5s var(--ease); }
+  .aurora i{ position:absolute; display:block; border-radius:50%; filter:blur(70px); }
+  .aurora .a{ width:70vmax; height:70vmax; left:-14vmax; top:-26vmax; opacity:.75;
+    background:radial-gradient(circle at 50% 50%, rgba(124,92,255,.72), rgba(124,92,255,0) 68%);
+    animation:drift-a 22s ease-in-out infinite alternate; }
+  .aurora .b{ width:58vmax; height:58vmax; right:-14vmax; top:-14vmax; opacity:.6;
+    background:radial-gradient(circle at 50% 50%, rgba(63,216,200,.42), rgba(63,216,200,0) 68%);
+    animation:drift-b 26s ease-in-out infinite alternate; }
+  .aurora .c{ width:76vmax; height:76vmax; left:8vmax; bottom:-36vmax; opacity:.7;
+    background:radial-gradient(circle at 50% 50%, rgba(59,46,143,.68), rgba(59,46,143,0) 70%);
+    animation:drift-c 30s ease-in-out infinite alternate; }
+  @keyframes drift-a{ to{ transform:translate3d(6vmax,5vmax,0) scale(1.08); } }
+  @keyframes drift-b{ to{ transform:translate3d(-7vmax,6vmax,0) scale(1.12); } }
+  @keyframes drift-c{ to{ transform:translate3d(4vmax,-6vmax,0) scale(1.06); } }
+  body.dim .aurora{ opacity:.34; }
+
+  /* ---------- layout ---------- */
+  .wrap{ width:100%; max-width:1120px; margin-inline:auto; padding-inline:clamp(16px,4vw,32px); }
+  .topbar{ padding-top:var(--s5); }
+  main{ padding-bottom:var(--s8); }
+  .app{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:var(--s5); margin-top:var(--s5); align-items:start; }
+  .side{ display:grid; gap:var(--s5); min-width:0; }
+  .app > *{ min-width:0; }
+
+  /* ---------- glass + opaque sheets ---------- */
+  .glass{
+    position:relative;
+    background:var(--glass-2);
+    -webkit-backdrop-filter:var(--blur);
+    backdrop-filter:var(--blur);
+    border:1px solid var(--hairline);
+    border-radius:24px;
+    padding:var(--s2);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.22), var(--shadow-3);
+    transition:box-shadow .24s var(--ease), border-color .24s var(--ease);
+  }
+  .glass-1{ background:var(--glass-1); border-radius:22px; }
+  .glass-3{ background:var(--glass-3); }
+  .app .glass:hover{ border-color:rgba(255,255,255,0.22); box-shadow:inset 0 1px 0 rgba(255,255,255,0.26), 0 30px 70px -24px rgba(8,4,36,0.9); }
+
+  .sheet{
+    background:linear-gradient(180deg, rgba(24,21,54,0.97), rgba(18,16,42,0.96));
+    border:1px solid rgba(255,255,255,0.10);
+    border-radius:20px;
+    padding:var(--s5);
+    min-width:0;
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+    .glass{ background:linear-gradient(160deg,#241C56,#16113A); -webkit-backdrop-filter:none; backdrop-filter:none; }
+    .glass-1{ background:linear-gradient(160deg,#1E1848,#151134); }
+    .glass-3{ background:linear-gradient(160deg,#2A2166,#1A1442); }
+  }
+
+  /* ---------- type ---------- */
+  h1,h2,h3,p,ul,ol,figure{ margin:0; }
+  h1{ font-size:clamp(24px,4.2vw,32px); font-weight:300; letter-spacing:-0.02em; line-height:1.08; }
+  h2{ font-size:clamp(18px,3vw,23px); font-weight:450; letter-spacing:-0.01em; line-height:1.2; }
+  .eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color:var(--fg-muted); }
+  .helper{ font-size:12.5px; font-weight:500; letter-spacing:0.02em; color:var(--fg-muted); overflow-wrap:anywhere; }
+  .num{ font-family:var(--font-num); font-variant-numeric:tabular-nums; }
+  .track-title{ font-size:clamp(20px,3.6vw,28px); font-weight:450; letter-spacing:-0.01em; line-height:1.2; overflow-wrap:anywhere; }
+
+  a{ color:var(--aurora-teal); text-decoration:underline; text-underline-offset:3px; }
+  a:hover{ color:#8FE8DC; }
+
+  :where(a,button,input,select,textarea,[tabindex]):focus-visible{
+    outline:2px solid var(--focus);
+    outline-offset:2px;
+  }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    font:inherit;
+    font-weight:600;
+    font-size:15px;
+    border-radius:999px;
+    padding:12px 22px;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:background-color .12s var(--ease), border-color .12s var(--ease), transform .12s var(--ease), color .12s var(--ease);
+  }
+  .btn-primary{ background:var(--aurora-violet-deep); color:#FFFFFF; }
+  .btn-primary:hover{ background:var(--aurora-violet-hover); }
+  .btn-primary:active{ background:var(--aurora-violet-active); transform:translateY(1px); }
+  .btn-primary:disabled{ background:rgba(255,255,255,0.10); color:var(--fg-muted); cursor:not-allowed; transform:none; }
+
+  .btn-secondary{ background:transparent; color:var(--fg); border-color:rgba(255,255,255,0.28); }
+  .btn-secondary:hover{ background:rgba(255,255,255,0.10); }
+  .btn-secondary:active{ background:rgba(255,255,255,0.16); transform:translateY(1px); }
+  .btn-secondary:disabled{ color:var(--fg-muted); border-color:rgba(255,255,255,0.14); cursor:not-allowed; transform:none; }
+
+  .btn-ghost{ background:transparent; color:var(--aurora-teal); border-color:rgba(63,216,200,0.42); padding:9px 16px; font-size:13px; }
+  .btn-ghost:hover{ background:rgba(63,216,200,0.12); }
+  .btn-ghost:active{ background:rgba(63,216,200,0.20); transform:translateY(1px); }
+
+  .btn-row{ display:flex; flex-wrap:wrap; gap:var(--s3); }
+
+  /* ---------- form controls ---------- */
+  .field{ display:grid; gap:var(--s2); min-width:0; }
+  .field > label, .field > .label{ font-size:12.5px; font-weight:500; letter-spacing:0.02em; color:var(--fg-muted); }
+  input[type="text"], select{
+    font:inherit; color:var(--fg); width:100%; min-width:0;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.18);
+    border-radius:12px;
+    padding:12px 14px;
+    transition:border-color .12s var(--ease), box-shadow .12s var(--ease), background-color .12s var(--ease);
+  }
+  input[type="text"]::placeholder{ color:rgba(185,180,230,0.75); }
+  input[type="text"]:hover, select:hover{ border-color:rgba(255,255,255,0.30); }
+  input[type="text"]:focus-visible, select:focus-visible{ box-shadow:0 0 0 4px rgba(63,216,200,0.25); }
+  select{ appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--fg-muted) 50%),linear-gradient(135deg,var(--fg-muted) 50%,transparent 50%); background-position:calc(100% - 20px) 50%, calc(100% - 14px) 50%; background-size:6px 6px,6px 6px; background-repeat:no-repeat; padding-right:40px; }
+  select option{ background:#16113A; color:var(--fg); }
+
+  input[type="range"]{ appearance:none; -webkit-appearance:none; width:100%; height:28px; background:transparent; cursor:pointer; }
+  input[type="range"]::-webkit-slider-runnable-track{ height:6px; border-radius:999px; background:linear-gradient(90deg,var(--aurora-teal) var(--fill,62%), rgba(255,255,255,0.16) var(--fill,62%)); }
+  input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:18px; height:18px; margin-top:-6px; border-radius:50%; background:var(--fg); border:2px solid var(--aurora-teal); }
+  input[type="range"]::-moz-range-track{ height:6px; border-radius:999px; background:rgba(255,255,255,0.16); }
+  input[type="range"]::-moz-range-progress{ height:6px; border-radius:999px; background:var(--aurora-teal); }
+  input[type="range"]::-moz-range-thumb{ width:16px; height:16px; border-radius:50%; background:var(--fg); border:2px solid var(--aurora-teal); }
+
+  .switch{ display:flex; align-items:center; gap:var(--s3); cursor:pointer; min-width:0; }
+  .switch input{ position:absolute; width:1px; height:1px; margin:0; padding:0; opacity:0; overflow:hidden; clip-path:inset(50%); }
+  .switch-track{ position:relative; flex:none; width:46px; height:26px; border-radius:999px; background:rgba(255,255,255,0.18); border:1px solid var(--hairline); transition:background-color .18s var(--ease); }
+  .switch-track::after{ content:""; position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:var(--fg); transition:transform .18s var(--ease), background-color .18s var(--ease); }
+  .switch:hover .switch-track{ background:rgba(255,255,255,0.26); }
+  .switch input:checked + .switch-track{ background:var(--aurora-teal); }
+  .switch input:checked + .switch-track::after{ transform:translateX(20px); background:var(--page); }
+  .switch input:checked:hover + .switch-track{ background:#5FE3D5; }
+  .switch input:focus-visible + .switch-track{ outline:2px solid var(--focus); outline-offset:2px; }
+  .switch-label{ font-size:13.5px; color:var(--fg); overflow-wrap:anywhere; }
+
+  /* ---------- player ---------- */
+  .player-head{ display:grid; gap:var(--s2); }
+  .player-meta{ font-size:13px; color:var(--fg-muted); overflow-wrap:anywhere; }
+  .wave{ display:block; width:100%; height:72px; margin-top:var(--s4); }
+  .wave rect{ fill:var(--aurora-teal); opacity:.55; transform-box:fill-box; transform-origin:center; }
+  body.is-playing .wave rect{ opacity:1; animation:bar 1.6s ease-in-out infinite alternate; animation-delay:calc(var(--i) * 90ms); }
+  @keyframes bar{ from{ transform:scaleY(.32); } to{ transform:scaleY(1.12); } }
+
+  .timer-row{ display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:var(--s4); margin-top:var(--s5); }
+  .timer{ font-family:var(--font-num); font-variant-numeric:tabular-nums; font-size:clamp(38px,10vw,64px); font-weight:300; letter-spacing:-0.03em; line-height:1; }
+
+  .controls{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:var(--s4); margin-top:var(--s5); padding-top:var(--s5); border-top:1px solid rgba(255,255,255,0.10); }
+  .controls > *{ min-width:0; }
+  .full{ grid-column:1 / -1; }
+
+  .demo-block{ margin-top:var(--s5); padding-top:var(--s4); border-top:1px dashed rgba(255,255,255,0.16); display:grid; gap:var(--s2); }
+  .status{ font-size:13px; color:var(--aurora-teal); overflow-wrap:anywhere; }
+
+  /* ---------- picker ---------- */
+  .picker{ list-style:none; padding:0; margin:var(--s3) 0 0; display:grid; gap:var(--s1); }
+  .track-option{
+    display:block; width:100%; text-align:left; font:inherit; cursor:pointer;
+    background:transparent; color:var(--fg);
+    border:1px solid transparent; border-radius:14px;
+    padding:10px 12px;
+    transition:background-color .12s var(--ease), border-color .12s var(--ease);
+  }
+  .track-option:hover{ background:rgba(255,255,255,0.06); border-color:var(--hairline); }
+  .track-option:active{ background:rgba(255,255,255,0.10); }
+  .track-option[aria-pressed="true"]{ background:rgba(63,216,200,0.12); border-color:rgba(63,216,200,0.5); }
+  .track-option .row{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:var(--s2); }
+  .track-option .name{ font-weight:600; font-size:14px; overflow-wrap:anywhere; }
+  .track-option .sub{ font-size:12.5px; color:var(--fg-muted); overflow-wrap:anywhere; }
+  .pill{ font-size:10.5px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--page); background:var(--aurora-teal); border-radius:999px; padding:2px 8px; }
+  .pill-hidden{ visibility:hidden; }
+
+  /* ---------- stats ---------- */
+  .stats{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--s3); margin-top:var(--s3); }
+  .stat{ background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.10); border-radius:14px; padding:var(--s3); min-width:0; }
+  .stat b{ display:block; font-family:var(--font-num); font-variant-numeric:tabular-nums; font-size:22px; font-weight:400; letter-spacing:-0.01em; }
+  .stat span{ font-size:11.5px; font-weight:500; letter-spacing:0.02em; color:var(--fg-muted); }
+  .spark{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; align-items:end; height:64px; margin-top:var(--s4); }
+  .spark i{ display:block; background:linear-gradient(180deg,var(--aurora-teal),rgba(63,216,200,0.22)); border-radius:6px 6px 4px 4px; min-height:6px; }
+  .spark-days{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; margin-top:var(--s2); }
+  .spark-days span{ text-align:center; font-size:10.5px; letter-spacing:0.04em; color:var(--fg-muted); }
+
+  /* ---------- chrome header / footer ---------- */
+  .chrome-in{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--s3); padding:var(--s4) var(--s5); }
+  .brand{ display:flex; align-items:center; gap:var(--s3); min-width:0; }
+  .brand .tagline{ font-size:12.5px; color:var(--fg-muted); }
+  .mark{ flex:none; width:38px; height:38px; border-radius:12px; background:linear-gradient(150deg,var(--aurora-violet),var(--aurora-teal)); box-shadow:inset 0 1px 0 rgba(255,255,255,0.4); }
+  .all-styles{ font-size:13.5px; font-weight:600; }
+
+  footer{ padding:0 0 var(--s7); }
+  footer .sheet{ font-size:12.5px; color:var(--fg-muted); }
+
+  .intro-card{ margin-top:var(--s5); }
+  .intro-line{ max-width:62ch; font-size:14px; color:var(--fg-muted); }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    .app{ grid-template-columns:minmax(0,1fr); }
+  }
+  @media (max-width:560px){
+    .stats{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .btn{ width:100%; }
+    .btn-row{ width:100%; gap:var(--s2); }
+    .timer-row{ align-items:flex-start; }
+    .timer-row > *{ min-width:0; }
+    .eyebrow{ letter-spacing:0.10em; }
+  }
+  @media (max-width:420px){
+    .sheet{ padding:var(--s4); }
+    .chrome-in{ padding:var(--s4); }
+    .timer{ font-size:clamp(34px,11vw,44px); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition-duration:.001ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="aurora" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i></div>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="glass glass-1">
+      <div class="sheet chrome-in">
+        <div class="brand">
+          <span class="mark" aria-hidden="true"></span>
+          <div>
+            <h1>Halo Focus</h1>
+            <p class="tagline">Aurora soundscapes for deep work</p>
+          </div>
+        </div>
+        <a class="all-styles" href="index.html">All styles</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="glass glass-1 intro-card">
+    <div class="sheet">
+      <p class="intro-line">Late-evening light, three sheets of glass, and one quiet room. Pick a soundscape, choose a length, and let the aurora hold the noise.</p>
+    </div>
+  </div>
+
+  <div class="app">
+
+    <section class="glass glass-3" aria-labelledby="session-h">
+      <div class="sheet">
+        <div class="player-head">
+          <p class="eyebrow">Now playing</p>
+          <h2 id="session-h">Your focus session</h2>
+          <p class="track-title" id="track-title">Rain on glass</p>
+          <p class="player-meta" id="track-meta">Field recording · 41 min loop · binaural mix</p>
+        </div>
+
+        <svg class="wave" viewBox="0 0 320 72" preserveAspectRatio="none" role="img" aria-labelledby="wave-title">
+          <title id="wave-title">Waveform of the current soundscape; the bars animate while the session plays</title>
+          <rect x="6" y="29" width="6" height="14" rx="3" style="--i:0"></rect>
+          <rect x="17" y="25" width="6" height="22" rx="3" style="--i:1"></rect>
+          <rect x="28" y="19" width="6" height="34" rx="3" style="--i:2"></rect>
+          <rect x="39" y="10" width="6" height="52" rx="3" style="--i:3"></rect>
+          <rect x="50" y="14" width="6" height="44" rx="3" style="--i:4"></rect>
+          <rect x="61" y="23" width="6" height="26" rx="3" style="--i:5"></rect>
+          <rect x="72" y="28" width="6" height="16" rx="3" style="--i:6"></rect>
+          <rect x="83" y="21" width="6" height="30" rx="3" style="--i:7"></rect>
+          <rect x="94" y="7" width="6" height="58" rx="3" style="--i:8"></rect>
+          <rect x="105" y="3" width="6" height="66" rx="3" style="--i:9"></rect>
+          <rect x="116" y="12" width="6" height="48" rx="3" style="--i:10"></rect>
+          <rect x="127" y="22" width="6" height="28" rx="3" style="--i:11"></rect>
+          <rect x="138" y="27" width="6" height="18" rx="3" style="--i:12"></rect>
+          <rect x="149" y="24" width="6" height="24" rx="3" style="--i:13"></rect>
+          <rect x="160" y="16" width="6" height="40" rx="3" style="--i:14"></rect>
+          <rect x="171" y="6" width="6" height="60" rx="3" style="--i:15"></rect>
+          <rect x="182" y="11" width="6" height="50" rx="3" style="--i:16"></rect>
+          <rect x="193" y="20" width="6" height="32" rx="3" style="--i:17"></rect>
+          <rect x="204" y="26" width="6" height="20" rx="3" style="--i:18"></rect>
+          <rect x="215" y="23" width="6" height="26" rx="3" style="--i:19"></rect>
+          <rect x="226" y="13" width="6" height="46" rx="3" style="--i:20"></rect>
+          <rect x="237" y="5" width="6" height="62" rx="3" style="--i:21"></rect>
+          <rect x="248" y="9" width="6" height="54" rx="3" style="--i:22"></rect>
+          <rect x="259" y="18" width="6" height="36" rx="3" style="--i:23"></rect>
+          <rect x="270" y="25" width="6" height="22" rx="3" style="--i:24"></rect>
+          <rect x="281" y="28" width="6" height="16" rx="3" style="--i:25"></rect>
+          <rect x="292" y="22" width="6" height="28" rx="3" style="--i:26"></rect>
+          <rect x="303" y="15" width="6" height="42" rx="3" style="--i:27"></rect>
+        </svg>
+
+        <div class="timer-row">
+          <div>
+            <p class="eyebrow">Remaining</p>
+            <p class="timer num" id="timer-readout">45:00</p>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-primary" id="play-btn" aria-pressed="false">Play session</button>
+            <button type="button" class="btn btn-secondary" id="pause-btn">Pause</button>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="field">
+            <label for="duration">Session length</label>
+            <select id="duration">
+              <option value="25">25 minutes — shallow sprint</option>
+              <option value="45" selected>45 minutes — standard block</option>
+              <option value="60">60 minutes — deep dive</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="volume">Volume</label>
+            <input type="range" id="volume" min="0" max="100" step="1" value="62" style="--fill:62%">
+            <p class="helper" id="vol-out">62% — comfortable for headphones</p>
+          </div>
+
+          <div class="field full">
+            <label for="intention">Focus intention</label>
+            <input type="text" id="intention" placeholder="e.g. finish the migration spec">
+          </div>
+
+          <div class="full">
+            <label class="switch">
+              <input type="checkbox" id="dim">
+              <span class="switch-track" aria-hidden="true"></span>
+              <span class="switch-label">Dim the aurora while the session runs</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="demo-block">
+          <button type="button" class="btn btn-ghost" id="demo-action" aria-label="Demo: load the next soundscape">Demo: load next soundscape</button>
+          <p class="helper">Interactive demo — changes are local to this page only.</p>
+          <p class="status" id="player-status" role="status" aria-live="polite">Demo: Rain on glass is loaded in the player.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="side">
+
+      <section class="glass" aria-labelledby="scapes-h">
+        <div class="sheet">
+          <h2 id="scapes-h">Soundscapes</h2>
+          <p class="helper" style="margin-top:8px">Recorded in-house, looped seamlessly. Selection stays on this page.</p>
+          <ul class="picker">
+            <li>
+              <button type="button" class="track-option" aria-pressed="true">
+                <span class="row">
+                  <span class="name">Rain on glass</span>
+                  <span class="pill">Playing</span>
+                </span>
+                <span class="sub">Field recording · 41 min · close-mic window</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="track-option" aria-pressed="false">
+                <span class="row">
+                  <span class="name">Night drive</span>
+                  <span class="pill pill-hidden">Playing</span>
+                </span>
+                <span class="sub">Synthesised · 52 min · warm tape hiss</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="track-option" aria-pressed="false">
+                <span class="row">
+                  <span class="name">Café murmur</span>
+                  <span class="pill pill-hidden">Playing</span>
+                </span>
+                <span class="sub">Field recording · 33 min · no speech, no music</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="track-option" aria-pressed="false">
+                <span class="row">
+                  <span class="name">Aurora drone</span>
+                  <span class="pill pill-hidden">Playing</span>
+                </span>
+                <span class="sub">Generative pad · 60 min · slow shifting fifths</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="glass" aria-labelledby="stats-h">
+        <div class="sheet">
+          <h2 id="stats-h">This week</h2>
+          <div class="stats">
+            <div class="stat"><b>312</b><span>min focused</span></div>
+            <div class="stat"><b>6</b><span>day streak</span></div>
+            <div class="stat"><b>18</b><span>sessions</span></div>
+          </div>
+          <div class="spark" role="img" aria-label="Focus minutes by day, Monday to Sunday: 42, 58, 30, 65, 12, 48, 57.">
+            <i style="height:41px"></i>
+            <i style="height:57px"></i>
+            <i style="height:30px"></i>
+            <i style="height:64px"></i>
+            <i style="height:12px"></i>
+            <i style="height:47px"></i>
+            <i style="height:56px"></i>
+          </div>
+          <div class="spark-days" aria-hidden="true">
+            <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="glass glass-1">
+      <div class="sheet">
+        Halo Focus is a design concept. No audio is streamed, stored or recorded, and every interaction on this page changes local state only.
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var tracks = [
+    { name: "Rain on glass", meta: "Field recording · 41 min loop · binaural mix" },
+    { name: "Night drive", meta: "Synthesised · 52 min loop · warm tape hiss" },
+    { name: "Café murmur", meta: "Field recording · 33 min loop · no speech, no music" },
+    { name: "Aurora drone", meta: "Generative pad · 60 min loop · slow shifting fifths" }
+  ];
+
+  var index = 0;
+  var title = document.getElementById("track-title");
+  var meta = document.getElementById("track-meta");
+  var status = document.getElementById("player-status");
+  var options = Array.prototype.slice.call(document.querySelectorAll(".track-option"));
+
+  function render(announcement) {
+    title.textContent = tracks[index].name;
+    meta.textContent = tracks[index].meta;
+    for (var i = 0; i < options.length; i++) {
+      var selected = i === index;
+      options[i].setAttribute("aria-pressed", selected ? "true" : "false");
+      var pill = options[i].querySelector(".pill");
+      pill.classList.toggle("pill-hidden", !selected);
+    }
+    status.textContent = announcement;
+  }
+
+  document.getElementById("demo-action").addEventListener("click", function () {
+    index = (index + 1) % tracks.length;
+    render("Demo: now playing " + tracks[index].name + ". Nothing is streamed — this is a local preview.");
+  });
+
+  options.forEach(function (option, i) {
+    option.addEventListener("click", function () {
+      index = i;
+      render("Loaded " + tracks[i].name + " into the player.");
+    });
+  });
+
+  var duration = document.getElementById("duration");
+  var readout = document.getElementById("timer-readout");
+  duration.addEventListener("change", function () {
+    readout.textContent = duration.value + ":00";
+    status.textContent = "Session length set to " + duration.value + " minutes.";
+  });
+
+  var volume = document.getElementById("volume");
+  var volOut = document.getElementById("vol-out");
+  volume.addEventListener("input", function () {
+    volume.style.setProperty("--fill", volume.value + "%");
+    volOut.textContent = volume.value + (volume.value > 75 ? "% — loud for long sessions" : "% — comfortable for headphones");
+  });
+
+  var play = document.getElementById("play-btn");
+  var pause = document.getElementById("pause-btn");
+
+  play.addEventListener("click", function () {
+    document.body.classList.add("is-playing");
+    play.setAttribute("aria-pressed", "true");
+    status.textContent = "Playing " + tracks[index].name + " (visual demo only).";
+  });
+
+  pause.addEventListener("click", function () {
+    document.body.classList.remove("is-playing");
+    play.setAttribute("aria-pressed", "false");
+    status.textContent = "Paused on " + tracks[index].name + ".";
+  });
+
+  document.getElementById("dim").addEventListener("change", function (event) {
+    document.body.classList.toggle("dim", event.target.checked);
+  });
+})();
+</script>
+</body>
+</html>

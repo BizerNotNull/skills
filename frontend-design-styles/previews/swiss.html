@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview — Swiss International Poster</title>
+<style>
+  :root{
+    --white:#ffffff;
+    --paper:#f2f2f2;
+    --black:#111111;
+    --grey:#6b6b6b;
+    --rule:#d4d4d4;
+    --red:#e30613;
+    --grotesk:"Helvetica Neue",Helvetica,Inter,Arial,"Segoe UI",Roboto,sans-serif;
+    --col-gap:1.25rem;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--white);
+    color:var(--black);
+    font-family:var(--grotesk);
+    font-size:16px;
+    line-height:1.45;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .shell{width:min(1240px,100% - 2.4rem);margin-inline:auto;}
+  a{color:var(--black);text-decoration:none;border-bottom:2px solid var(--red);}
+  a:hover{background:var(--red);color:var(--white);}
+  :focus-visible{outline:3px solid var(--red);outline-offset:2px;}
+
+  /* ---------- top rule bar ---------- */
+  .bar{border-bottom:1px solid var(--rule);}
+  .bar .shell{
+    display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;
+    min-height:2.9rem;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
+  }
+  .all-styles{
+    border:2px solid var(--black);padding:.3rem .6rem;border-bottom:2px solid var(--black);
+    display:inline-block;font-weight:700;
+  }
+  .all-styles:hover{background:var(--red);border-color:var(--red);color:var(--white);}
+  .bar .meta{color:var(--grey);font-weight:400;}
+
+  /* ---------- poster hero ---------- */
+  .poster{padding:1.6rem 0 0;}
+  .hero{
+    display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--col-gap);
+    border-top:3px solid var(--black);
+    padding-top:1rem;
+  }
+  .hero .eyebrow{grid-column:1 / span 5;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--grey);margin:0 0 .4rem;}
+  .hero .place{grid-column:9 / span 4;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;text-align:right;margin:0 0 .4rem;color:var(--grey);}
+  .title{
+    grid-column:1 / span 9;margin:0;
+    font-size:clamp(3.2rem,13vw,10.5rem);
+    line-height:.82;letter-spacing:-.045em;font-weight:700;text-transform:uppercase;
+  }
+  .title .thin{font-weight:400;}
+  .numeral{
+    grid-column:10 / span 3;align-self:end;text-align:right;
+    font-size:clamp(3.6rem,11vw,9rem);line-height:.8;font-weight:700;letter-spacing:-.05em;
+    color:var(--red);
+  }
+  .hero .summary{
+    grid-column:1 / span 6;margin:1.4rem 0 0;font-size:clamp(1rem,1.6vw,1.35rem);
+    line-height:1.3;letter-spacing:-.01em;font-weight:400;
+  }
+  .hero .facts{
+    grid-column:8 / span 5;margin:1.4rem 0 0;padding:0;list-style:none;
+    border-top:2px solid var(--black);
+  }
+  .hero .facts li{
+    display:flex;justify-content:space-between;gap:1rem;
+    border-bottom:1px solid var(--rule);padding:.5rem 0;font-size:.82rem;
+  }
+  .hero .facts b{font-weight:700;letter-spacing:.02em;text-transform:uppercase;}
+  .hero .facts span{color:var(--grey);}
+
+  .redband{
+    margin-top:1.6rem;background:var(--red);color:var(--white);
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    padding:.7rem 0;
+  }
+  .redband .shell{
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
+  }
+
+  /* ---------- programme ---------- */
+  section.blk{padding:2.6rem 0;border-bottom:1px solid var(--rule);}
+  .blkhead{
+    display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--col-gap);
+    align-items:baseline;margin-bottom:1.2rem;
+  }
+  .blkhead h2{
+    grid-column:1 / span 8;margin:0;font-size:clamp(1.6rem,4vw,2.6rem);
+    letter-spacing:-.03em;text-transform:uppercase;line-height:1;
+  }
+  .blkhead .idx{
+    grid-column:9 / span 4;text-align:right;font-size:clamp(1.6rem,4vw,2.6rem);
+    font-weight:700;color:var(--red);line-height:1;
+  }
+  .rows{list-style:none;margin:0;padding:0;border-top:3px solid var(--black);}
+  .rows li{
+    display:grid;grid-template-columns:7rem minmax(0,1fr) 9rem 5rem;
+    gap:1rem;align-items:baseline;border-bottom:1px solid var(--rule);padding:.85rem 0;
+  }
+  .rows .t{font-weight:700;font-size:1.05rem;letter-spacing:-.01em;}
+  .rows .d{color:var(--grey);font-size:.86rem;}
+  .rows .who{font-size:.86rem;}
+  .rows .tag{
+    justify-self:end;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+    border:1px solid var(--black);padding:.15rem .4rem;font-weight:700;
+  }
+  .rows .tag.full{background:var(--black);color:var(--white);border-color:var(--black);}
+
+  /* ---------- poster cards ---------- */
+  .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--col-gap);}
+  .card{
+    border:1px solid var(--black);padding:1rem;min-width:0;
+    display:flex;flex-direction:column;gap:.6rem;background:var(--white);
+  }
+  .card .big{font-size:clamp(3rem,7vw,5.5rem);line-height:.8;font-weight:700;letter-spacing:-.06em;}
+  .card.a .big{color:var(--red);}
+  .card h3{margin:0;font-size:1rem;text-transform:uppercase;letter-spacing:.02em;}
+  .card p{margin:0;font-size:.85rem;color:var(--grey);line-height:1.4;}
+  .card .swatch{display:flex;gap:.35rem;margin-top:auto;}
+  .card .swatch i{width:1.1rem;height:1.1rem;border:1px solid var(--black);display:block;}
+  .card .swatch i.r{background:var(--red);}
+  .card .swatch i.k{background:var(--black);}
+  .card .swatch i.w{background:var(--white);}
+
+  /* ---------- demo strip ---------- */
+  .demo{background:var(--paper);border-bottom:1px solid var(--rule);}
+  .demo .shell{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem 2rem;
+    align-items:center;padding:1.1rem 0;
+  }
+  .demo .tag{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--red);margin:0 0 .3rem;}
+  .demo p{margin:0;font-size:.86rem;max-width:52ch;color:var(--black);}
+  button#demo-action{
+    font-family:var(--grotesk);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
+    padding:.85rem 1.1rem;border:2px solid var(--black);background:var(--white);color:var(--black);
+    cursor:pointer;min-width:13rem;
+  }
+  button#demo-action:hover{background:var(--black);color:var(--white);}
+  button#demo-action[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:var(--white);}
+
+  /* ---------- components ---------- */
+  .comps{padding:2.6rem 0 3rem;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:1.6rem var(--col-gap);}
+  .comp{grid-column:span 4;min-width:0;}
+  .comp h4{
+    margin:0 0 .8rem;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;
+    border-bottom:2px solid var(--black);padding-bottom:.45rem;color:var(--black);
+  }
+  .btns{display:flex;flex-wrap:wrap;gap:.6rem;}
+  .btn{
+    font:inherit;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+    padding:.7rem 1rem;border:2px solid var(--black);background:var(--white);cursor:pointer;
+  }
+  .btn.primary{background:var(--black);color:var(--white);}
+  .btn:hover{background:var(--black);color:var(--white);}
+  .btn.primary:hover{background:var(--red);border-color:var(--red);}
+  .field{display:grid;gap:.5rem;}
+  .field label{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;}
+  .field input{
+    font:inherit;font-size:.9rem;padding:.7rem .7rem;border:2px solid var(--black);
+    background:var(--white);color:var(--black);width:100%;
+  }
+  .field input::placeholder{color:var(--grey);}
+  .msg{font-size:.78rem;color:var(--grey);min-height:1.2em;margin:.7rem 0 0;}
+  .field .msg{margin:0;}
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;list-style:none;margin:0;padding:0;}
+  .chips li{border:1px solid var(--black);padding:.3rem .55rem;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;}
+
+  footer.foot{
+    border-top:3px solid var(--black);padding:1.4rem 0 2.4rem;
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);
+  }
+
+  /* ---------- modular grid overlay (demo state) ---------- */
+  .gridlines{display:none;}
+  body.grid-on .gridlines{
+    display:block;position:fixed;inset:0;pointer-events:none;z-index:9;
+  }
+  body.grid-on .gridlines .cols{
+    width:min(1240px,100% - 2.4rem);height:100%;margin-inline:auto;
+    display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--col-gap);
+  }
+  body.grid-on .gridlines .cols span{
+    background:rgba(227,6,19,.09);
+    box-shadow:inset 1px 0 0 rgba(227,6,19,.5),inset -1px 0 0 rgba(227,6,19,.5);
+  }
+  body.grid-on .gridlines .baseline{
+    position:absolute;inset:0;
+    background:repeating-linear-gradient(to bottom,rgba(17,17,17,.16) 0 1px,transparent 1px 22px);
+  }
+
+  @media (max-width:900px){
+    .hero .eyebrow,.hero .place{grid-column:1 / -1;text-align:left;}
+    .title{grid-column:1 / -1;}
+    .numeral{grid-column:1 / -1;text-align:left;}
+    .hero .summary,.hero .facts{grid-column:1 / -1;}
+    .blkhead h2,.blkhead .idx{grid-column:1 / -1;text-align:left;}
+    .rows li{grid-template-columns:minmax(0,1fr) auto;}
+    .rows .d,.rows .who{grid-column:1 / -1;}
+    .rows .tag{justify-self:start;}
+    .cards{grid-template-columns:1fr;}
+    .comp{grid-column:1 / -1;}
+  }
+  @media (max-width:560px){
+    .demo .shell{grid-template-columns:1fr;}
+    button#demo-action{min-width:0;width:100%;}
+    .title{font-size:clamp(1.9rem,12.5vw,3rem);}
+    .rows li{grid-template-columns:1fr;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important;scroll-behavior:auto!important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="gridlines" aria-hidden="true">
+  <div class="baseline"></div>
+  <div class="cols"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+
+<div class="bar">
+  <div class="shell">
+    <a class="all-styles" href="index.html">&larr; All styles</a>
+    <span class="meta">Kunsthalle Basel &middot; Halle 2 &middot; 12 Okt &ndash; 24 Nov</span>
+  </div>
+</div>
+
+<div class="poster">
+  <div class="shell hero">
+    <p class="eyebrow">Internationale Plakatausstellung</p>
+    <p class="place">Basel &middot; CH</p>
+    <h1 class="title">Kon<span class="thin">strukt</span></h1>
+    <p class="numeral" aria-hidden="true">24</p>
+    <p class="summary">Eighty-four posters from six cities. One grid, held without exception &mdash; and every
+      argument that broke it.</p>
+    <ul class="facts">
+      <li><b>Laufzeit</b><span>12 Okt &ndash; 24 Nov</span></li>
+      <li><b>Saal</b><span>Halle 2, Erdgeschoss</span></li>
+      <li><b>Öffnung</b><span>Di&ndash;So 10&ndash;18 Uhr</span></li>
+      <li><b>Eintritt</b><span>CHF 14 / 9</span></li>
+    </ul>
+  </div>
+
+  <div class="redband">
+    <div class="shell">
+      <span>Eröffnung 12 Okt, 18 Uhr</span>
+      <span>Führungen Do 18 Uhr</span>
+      <span>Katalog CHF 38</span>
+    </div>
+  </div>
+</div>
+
+<main>
+  <section class="shell blk" aria-labelledby="prog">
+    <div class="blkhead">
+      <h2 id="prog">Programm</h2>
+      <p class="idx" aria-hidden="true">01</p>
+    </div>
+    <ul class="rows">
+      <li>
+        <span class="t">Raster</span>
+        <span class="d">Die zwölf Spalten als Werkzeug und als Meinung</span>
+        <span class="who">Vortrag &middot; M. Brunner</span>
+        <span class="tag full">Saal</span>
+      </li>
+      <li>
+        <span class="t">Ziffer</span>
+        <span class="d">Grosse Nummern im Plakat, 1954 bis heute</span>
+        <span class="who">Führung &middot; A. Weber</span>
+        <span class="tag">Saal</span>
+      </li>
+      <li>
+        <span class="t">Signet</span>
+        <span class="d">Zeichen zwischen Norm und Eigensinn</span>
+        <span class="who">Werkstatt &middot; Labor 03</span>
+        <span class="tag">Ausgebucht</span>
+      </li>
+      <li>
+        <span class="t">Streit</span>
+        <span class="d">Podiumsgespräch über Ordnung und Bruch</span>
+        <span class="who">Podium &middot; sechs Gäste</span>
+        <span class="tag">Frei</span>
+      </li>
+    </ul>
+  </section>
+
+  <section class="shell blk" aria-labelledby="posters">
+    <div class="blkhead">
+      <h2 id="posters">Plakate in der Ausstellung</h2>
+      <p class="idx" aria-hidden="true">02</p>
+    </div>
+    <div class="cards">
+      <article class="card a">
+        <p class="big" aria-hidden="true">01</p>
+        <h3>Zürich 1954</h3>
+        <p>Offset, two colours, 90.5 &times; 128 cm. Printer's copy with registration marks intact.</p>
+        <div class="swatch" role="img" aria-label="Colourway: red, black, white"><i class="r"></i><i class="k"></i><i class="w"></i></div>
+      </article>
+      <article class="card">
+        <p class="big" aria-hidden="true">02</p>
+        <h3>Basel 1961</h3>
+        <p>Silkscreen on newsprint, 70 &times; 100 cm. Edition of 120, signed lower right.</p>
+        <div class="swatch" role="img" aria-label="Colourway: red, white, black"><i class="r"></i><i class="w"></i><i class="k"></i></div>
+      </article>
+      <article class="card">
+        <p class="big" aria-hidden="true">03</p>
+        <h3>Winterthur 1973</h3>
+        <p>Letterpress, single colour, 50 &times; 70 cm. The grid announced, then quietly abandoned.</p>
+        <div class="swatch" role="img" aria-label="Colourway: black, red, white"><i class="k"></i><i class="r"></i><i class="w"></i></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="demo" aria-labelledby="demoh">
+    <div class="shell">
+      <div>
+        <p class="tag" id="demoh">Demo &middot; raster an &amp; aus</p>
+        <p id="demo-status" role="status" aria-live="polite">Grid overlay: off. The toggle draws the twelve-column
+          grid and the 22&nbsp;px baseline over this page &mdash; a local display state, nothing changes on the server.</p>
+      </div>
+      <button id="demo-action" type="button" aria-pressed="false">Show grid</button>
+    </div>
+  </section>
+
+  <section class="shell comps" aria-label="Component specimens">
+    <div class="comp" data-demo-scope>
+      <h4>Buttons</h4>
+      <div class="btns">
+        <button class="btn primary" type="button" data-demo="no ticket is issued and no payment is taken">Ticket lösen</button>
+        <button class="btn" type="button" data-demo="no tour is booked">Rundgang buchen</button>
+        <button class="btn" type="button" data-demo="no catalogue is ordered">Katalog</button>
+      </div>
+      <p class="msg" data-demo-msg role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="comp">
+      <h4>Formular</h4>
+      <form class="field" id="signup" novalidate>
+        <label for="email">Mitteilungen zur Ausstellung</label>
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="name@beispiel.ch">
+        <button class="btn primary" type="submit">Abonnieren</button>
+        <p class="msg" id="signup-msg" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+
+    <div class="comp">
+      <h4>Status</h4>
+      <ul class="chips">
+        <li>Saal frei</li>
+        <li>Ausgebucht</li>
+        <li>Frei</li>
+        <li>Warteliste</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot shell">
+  <span>Konstrukt 24 &middot; typographic specimen</span>
+  <span><a href="index.html" class="all-styles" style="border-width:2px">All styles</a></span>
+</footer>
+
+<script>
+(function(){
+  var btn = document.getElementById("demo-action");
+  var status = document.getElementById("demo-status");
+  var on = false;
+  btn.addEventListener("click", function(){
+    on = !on;
+    document.body.classList.toggle("grid-on", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.textContent = on ? "Hide grid" : "Show grid";
+    status.textContent = "Grid overlay: " + (on ? "on" : "off") +
+      ". Twelve columns of 1.25rem gutters and a 22\u00a0px baseline are drawn over the page. Demo only: this is a local display state, no server call is made.";
+  });
+
+  /* Specimen controls: every auxiliary button reports honestly into its group's live region. */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-demo]"), function(b){
+    b.addEventListener("click", function(){
+      var scope = b.closest("[data-demo-scope]") || document;
+      var slot = scope.querySelector("[data-demo-msg]");
+      if(!slot){ return; }
+      slot.textContent = "Demo only \u2014 \u201c" + b.textContent.trim() + "\u201d: " +
+        b.getAttribute("data-demo") + ". This specimen shows the button's states only.";
+    });
+  });
+
+  document.getElementById("signup").addEventListener("submit", function(e){
+    e.preventDefault();
+    var v = document.getElementById("email").value.trim();
+    document.getElementById("signup-msg").textContent = v
+      ? "Demo only \u2014 no address is stored or transmitted."
+      : "Demo only \u2014 type any address to see the confirmation state.";
+  });
+})();
+</script>
+</body>
+</html>
