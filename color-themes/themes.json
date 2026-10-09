@@ -1,0 +1,314 @@
+{
+  "pairs": [
+    {
+      "id": "porcelain-cobalt",
+      "lightName": "Porcelain Cobalt",
+      "darkName": "Midnight Cobalt",
+      "light": {
+        "bg": "#F3F4F6",
+        "surface": "#FCFCFD",
+        "surface2": "#E5E7EB",
+        "text": "#1A1E28",
+        "muted": "#4D556A",
+        "border": "#C7CAD1",
+        "accent": "#315ED1",
+        "onAccent": "#F7F7F5",
+        "success": "#2F7454",
+        "warning": "#845F1F",
+        "danger": "#812922"
+      },
+      "dark": {
+        "bg": "#13151B",
+        "surface": "#1C1F26",
+        "surface2": "#282B34",
+        "text": "#EBECEF",
+        "muted": "#B0B4BF",
+        "border": "#40444F",
+        "accent": "#8DAAFF",
+        "onAccent": "#161616",
+        "success": "#8BD0B0",
+        "warning": "#E0BB7B",
+        "danger": "#DD847E"
+      }
+    },
+    {
+      "id": "jade-garden",
+      "lightName": "Jade Garden",
+      "darkName": "Jade Nocturne",
+      "light": {
+        "bg": "#F3F6F6",
+        "surface": "#FCFDFD",
+        "surface2": "#E5EBEA",
+        "text": "#1A2825",
+        "muted": "#4D6A64",
+        "border": "#C7D1CF",
+        "accent": "#11765E",
+        "onAccent": "#F7F7F5",
+        "success": "#2F7454",
+        "warning": "#845F1F",
+        "danger": "#812922"
+      },
+      "dark": {
+        "bg": "#131B19",
+        "surface": "#1C2624",
+        "surface2": "#283431",
+        "text": "#EBEFEE",
+        "muted": "#B0BFBB",
+        "border": "#404F4C",
+        "accent": "#5ED6B2",
+        "onAccent": "#161616",
+        "success": "#8BD0B0",
+        "warning": "#E0BB7B",
+        "danger": "#DD847E"
+      }
+    },
+    {
+      "id": "amber-dunes",
+      "lightName": "Amber Dunes",
+      "darkName": "Desert Embers",
+      "light": {
+        "bg": "#F6F5F3",
+        "surface": "#FDFCFC",
+        "surface2": "#EBE9E5",
+        "text": "#28231A",
+        "muted": "#6A5F4D",
+        "border": "#D1CDC7",
+        "accent": "#936011",
+        "onAccent": "#F7F7F5",
+        "success": "#2F7454",
+        "warning": "#845F1F",
+        "danger": "#812922"
+      },
+      "dark": {
+        "bg": "#1B1813",
+        "surface": "#26221C",
+        "surface2": "#342F28",
+        "text": "#EFEEEB",
+        "muted": "#BFB9B0",
+        "border": "#4F4940",
+        "accent": "#EABB62",
+        "onAccent": "#161616",
+        "success": "#8BD0B0",
+        "warning": "#E0BB7B",
+        "danger": "#DD847E"
+      }
+    },
+    {
+      "id": "orchid-mist",
+      "lightName": "Orchid Mist",
+      "darkName": "Velvet Orchid",
+      "light": {
+        "bg": "#F5F3F6",
+        "surface": "#FCFCFD",
+        "surface2": "#E8E6EA",
+        "text": "#221A28",
+        "muted": "#5E4D6A",
+        "border": "#CDC8D0",
+        "accent": "#9051BE",
+        "onAccent": "#F7F7F5",
+        "success": "#2F7454",
+        "warning": "#845F1F",
+        "danger": "#812922"
+      },
+      "dark": {
+        "bg": "#18131B",
+        "surface": "#221D25",
+        "surface2": "#2F2933",
+        "text": "#EDEBEF",
+        "muted": "#B9B0BF",
+        "border": "#48414E",
+        "accent": "#C697EE",
+        "onAccent": "#161616",
+        "success": "#8BD0B0",
+        "warning": "#E0BB7B",
+        "danger": "#DD847E"
+      }
+    },
+    {
+      "id": "coral-coast",
+      "lightName": "Coral Coast",
+      "darkName": "Coral Afterglow",
+      "light": {
+        "bg": "#F6F4F3",
+        "surface": "#FDFCFC",
+        "surface2": "#EBE6E5",
+        "text": "#281C1A",
+        "muted": "#6A524D",
+        "border": "#D1C9C7",
+        "accent": "#B74735",
+        "onAccent": "#F7F7F5",
+        "success": "#2F7454",
+        "warning": "#845F1F",
+        "danger": "#812922"
+      },
+      "dark": {
+        "bg": "#1B1413",
+        "surface": "#261E1C",
+        "surface2": "#342A28",
+        "text": "#EFECEB",
+        "muted": "#BFB3B0",
+        "border": "#4F4240",
+        "accent": "#F49480",
+        "onAccent": "#161616",
+        "success": "#8BD0B0",
+        "warning": "#E0BB7B",
+        "danger": "#DD847E"
+      }
+    },
+    {
+      "id": "arctic-lagoon",
+      "lightName": "Arctic Lagoon",
+      "darkName": "Polar Lagoon",
+      "light": {
+        "bg": "#F3F6F6",
+        "surface": "#FCFDFD",
+        "surface2": "#E5EAEB",
+        "text": "#1A2628",
+        "muted": "#4D656A",
+        "border": "#C7CFD1",
+        "accent": "#11768B",
+        "onAccent": "#F7F7F5",
+        "success": "#2F7454",
+        "warning": "#845F1F",
+        "danger": "#812922"
+      },
+      "dark": {
+        "bg": "#131A1B",
+        "surface": "#1C2426",
+        "surface2": "#283234",
+        "text": "#EBEEEF",
+        "muted": "#B0BCBF",
+        "border": "#404C4F",
+        "accent": "#65CCE3",
+        "onAccent": "#161616",
+        "success": "#8BD0B0",
+        "warning": "#E0BB7B",
+        "danger": "#DD847E"
+      }
+    },
+    {
+      "id": "rose-parchment",
+      "lightName": "Rose Parchment",
+      "darkName": "Rose Ink",
+      "light": {
+        "bg": "#F6F4F5",
+        "surface": "#FDFCFC",
+        "surface2": "#EAE6E8",
+        "text": "#281A20",
+        "muted": "#6A4D5A",
+        "border": "#D0C8CC",
+        "accent": "#B64879",
+        "onAccent": "#F7F7F5",
+        "success": "#2F7454",
+        "warning": "#845F1F",
+        "danger": "#812922"
+      },
+      "dark": {
+        "bg": "#1A1317",
+        "surface": "#251D21",
+        "surface2": "#33292D",
+        "text": "#EFEBED",
+        "muted": "#BFB0B7",
+        "border": "#4E4147",
+        "accent": "#EE91BB",
+        "onAccent": "#161616",
+        "success": "#8BD0B0",
+        "warning": "#E0BB7B",
+        "danger": "#DD847E"
+      }
+    },
+    {
+      "id": "olive-grove",
+      "lightName": "Olive Grove",
+      "darkName": "Moonlit Grove",
+      "light": {
+        "bg": "#F6F6F3",
+        "surface": "#FDFDFC",
+        "surface2": "#E9EBE6",
+        "text": "#25281A",
+        "muted": "#646A4D",
+        "border": "#CED1C7",
+        "accent": "#617323",
+        "onAccent": "#F7F7F5",
+        "success": "#2F7454",
+        "warning": "#845F1F",
+        "danger": "#812922"
+      },
+      "dark": {
+        "bg": "#191B13",
+        "surface": "#24261D",
+        "surface2": "#313328",
+        "text": "#EEEFEB",
+        "muted": "#BBBFB0",
+        "border": "#4B4E40",
+        "accent": "#BBCE72",
+        "onAccent": "#161616",
+        "success": "#8BD0B0",
+        "warning": "#E0BB7B",
+        "danger": "#DD847E"
+      }
+    },
+    {
+      "id": "copper-workshop",
+      "lightName": "Copper Workshop",
+      "darkName": "Copper Hearth",
+      "light": {
+        "bg": "#F6F4F3",
+        "surface": "#FDFCFC",
+        "surface2": "#EAE7E6",
+        "text": "#281F1A",
+        "muted": "#6A584D",
+        "border": "#D0CBC8",
+        "accent": "#9A5733",
+        "onAccent": "#F7F7F5",
+        "success": "#2F7454",
+        "warning": "#845F1F",
+        "danger": "#812922"
+      },
+      "dark": {
+        "bg": "#1B1613",
+        "surface": "#26201D",
+        "surface2": "#332D29",
+        "text": "#EFEDEB",
+        "muted": "#BFB6B0",
+        "border": "#4E4641",
+        "accent": "#DBA07A",
+        "onAccent": "#161616",
+        "success": "#8BD0B0",
+        "warning": "#E0BB7B",
+        "danger": "#DD847E"
+      }
+    },
+    {
+      "id": "slate-studio",
+      "lightName": "Slate Studio",
+      "darkName": "Slate Eclipse",
+      "light": {
+        "bg": "#F4F5F6",
+        "surface": "#FCFCFD",
+        "surface2": "#E7E8E9",
+        "text": "#1A2328",
+        "muted": "#4D5F6A",
+        "border": "#CACCCE",
+        "accent": "#54758B",
+        "onAccent": "#F7F7F5",
+        "success": "#2F7454",
+        "warning": "#845F1F",
+        "danger": "#812922"
+      },
+      "dark": {
+        "bg": "#151719",
+        "surface": "#1F2223",
+        "surface2": "#2B2E31",
+        "text": "#EBEEEF",
+        "muted": "#B0B9BF",
+        "border": "#44484B",
+        "accent": "#9BB9CE",
+        "onAccent": "#161616",
+        "success": "#8BD0B0",
+        "warning": "#E0BB7B",
+        "danger": "#DD847E"
+      }
+    }
+  ]
+}
